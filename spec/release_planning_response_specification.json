@@ -1,0 +1,53 @@
+
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Release Planning Response",
+    "type": "array",
+    "items": {
+        "title": "Release plan",
+        "description": "A single release plan",
+        "type": "object",
+        "properties": {
+            "optimization_criteria": {
+                "description": "A value representing how much business value was considered over priority in generating the release plan",
+                "type": "float",
+                "minimum": 0.0,
+                "maximum": 1.0
+            },
+            "releases": {
+                "description": "A collection of releases in this release plan",
+                "type": "array",
+                "items": {
+                    "title": "Release",
+                    "description": "A single release belonging to a release plan",
+                    "type": "object",
+                    "properties": {
+                        "order": {
+                            "description": "A value representing the position of this release in the release plan",
+                            "type": "integer",
+                            "minimum": 1
+                        },
+                        "features": {
+                            "description": "A collection of features that have been planned into this release",
+                            "type": "array",
+                            "items": {
+                                "title": "Feature",
+                                "description": "A single feature belonging to a release",
+                                "type": "object",
+                                "properties": {
+                                    "id": {
+                                        "description": "The unique identifier for the feature",
+                                        "type": "integer"
+                                    }
+                                },
+                                "required": ["id"]
+                            }
+                        }
+                    },
+                    "required": ["order", "features"]
+                }
+            }
+        },
+        "required": ["optimization_criteria", "releases"]
+    }
+}

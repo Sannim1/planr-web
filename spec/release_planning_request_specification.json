@@ -1,0 +1,45 @@
+
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Release Planning Request",
+    "type": "object",
+    "properties": {
+        "features": {
+            "description": "A collection of features which should be planned into releases",
+            "type": "array",
+            "items": {
+                "title": "Feature",
+                "description": "A single feature which should be planned into a release",
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "description": "The unique identifier for the feature",
+                        "type": "integer"
+                    },
+                    "priority": {
+                        "description": "The priority of the feature",
+                        "type": "integer",
+                    },
+                    "business_value": {
+                        "description": "The estimated business value of the feature",
+                        "type": "integer",
+                    },
+                    "effort": {
+                        "description": "An estimate of the number of hours required to complete this feature",
+                        "type": "integer",
+                    }
+                },
+                "required": ["id", "priority", "business_value", "effort"]
+            }
+        },
+        "team_capacity": {
+            "description": "The team capacity available per release to be used for planning releases",
+            "type": "integer"
+        },
+        "number_of_releases": {
+            "description": "The number of releases to plan for",
+            "type": "integer"
+        }
+    },
+    "required": ["features", "team_capacity", "number_of_releases"]
+}

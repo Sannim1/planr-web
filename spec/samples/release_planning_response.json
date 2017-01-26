@@ -1,0 +1,21 @@
+[
+    {
+        "optimization_criteria": "float/min:0.0, max:1.0",
+        "releases": [
+            {
+                "order": "integer/min:1, max:number_of_releases",
+                "features": [
+                    {
+                        "id": "integer/required"
+                    },
+                    {/* FEATURE 2 */},
+                    {/* FEATURE 3 */}
+                ]
+            },
+            {/* RELEASE 2*/},
+            {/* RELEASE 3*/}
+        ]
+    },
+    {/* RELEASE PLAN 2 */},
+    {/* RELEASE PLAN 3 */}
+]

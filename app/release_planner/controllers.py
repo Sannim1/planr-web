@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from werkzeug.exceptions import BadRequest
-from validator import ReleasePlannerValidator
+from validator import ReleasePlanRequestValidator
 from planner import Planner
 
 release_planner = Blueprint('release_planner', __name__, url_prefix = '/release_plans')
@@ -11,8 +11,8 @@ def get_index():
 
 @release_planner.route('/', methods = ['POST'])
 def create_release_plans():
-    validator = ReleasePlannerValidator()
-    if not validator.validate(request):
+    validator = ReleasePlanRequestValidator()
+    if not validator.validate(request.json):
         raise BadRequest(validator.errors()[0])
 
     planner = Planner()

@@ -1,36 +1,33 @@
-class ReleasePlannerValidator:
+class ReleasePlanRequestValidator:
     def __init__(self):
         self._errors = []
         self._required_fields = ["team_capacity", "number_of_releases", "features"]
         return
 
-    def validate(self, request):
-        if not request.is_json:
-            self.add_error("The release planning request should be JSON")
-            return False
+    def validate(self, release_plan_request):
         for required_field in self._required_fields:
-            if required_field not in request.json:
+            if required_field not in release_plan_request:
                 error_message = str(required_field) + " is a required field"
                 self.add_error(error_message)
                 return False
-        if not isinstance(request.json['team_capacity'], int):
-            self.add_error("The team_capacity field must be an intger")
+        if not isinstance(release_plan_request['team_capacity'], int):
+            self.add_error("The team_capacity field must be an integer")
             return False
-        if not isinstance(request.json['number_of_releases'], int):
-            self.add_error("The number_of_releases field must be an intger")
+        if not isinstance(release_plan_request['number_of_releases'], int):
+            self.add_error("The number_of_releases field must be an integer")
             return False
-        if not isinstance(request.json['features'], list):
+        if not isinstance(release_plan_request['features'], list):
             self.add_error("The features field must be an array")
             return False
-        if (request.json['number_of_releases'] < 1) or (request.json['number_of_releases'] > 3):
-            self.add_error("The number of releases should be between 1 and 3")
+        if (release_plan_request['number_of_releases'] < 1) or (release_plan_request['number_of_releases'] > 3):
+            self.add_error("The number of releases must be between 1 and 3")
             return False
-        if len(request.json['features']) < request.json['number_of_releases']:
+        if len(release_plan_request['features']) < release_plan_request['number_of_releases']:
             self.add_error("The number of features must be greater than or equal to the number of releases")
             return False
 
         feature_validator = FeatureValidator()
-        for feature in request.json['features']:
+        for feature in release_plan_request['features']:
             if not feature_validator.validate(feature):
                 self.add_error(feature_validator.errors()[0])
                 return False

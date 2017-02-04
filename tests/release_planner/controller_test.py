@@ -68,3 +68,41 @@ class ReleasePlannerRouteTests(unittest.TestCase):
 
         self.assertTrue("id" in release_plan_one["releases"][0]["features"][0])
 
+    def test_non_JSON_release_plan_request_results_in_a_400_error(self):
+        result = self.app.post("release_plans/", data = "")
+
+        self.assertEquals(result.status_code, 400)
+        self.assertEquals(result.headers.get("Content-Type"), "application/json")
+
+        response_body = json.loads(result.data)
+        self.assertTrue("error" in response_body)
+
+    def test_invalid_release_plan_requests_result_in_a_400_error(self):
+        invalid_release_plan_request = json.dumps({
+            "features": [
+                {
+                    "id": 1,
+                    "priority": 10,
+                    "business_value": 2,
+                    "effort": 40
+                },
+                {
+                    "id": 2,
+                    "priority": 10,
+                    "business_value": 2,
+                    "effort": 40
+                }
+            ],
+            "team_capacity": 300
+        })
+
+        result = self.app.post("release_plans/",
+            data = invalid_release_plan_request,
+            content_type = "application/json"
+        )
+
+        self.assertEquals(result.status_code, 400)
+        self.assertEquals(result.headers.get("Content-Type"), "application/json")
+
+        response_body = json.loads(result.data)
+        self.assertTrue("error" in response_body)

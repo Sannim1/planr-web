@@ -39,19 +39,25 @@ class Evolve:
         population = self.toolbox.population(n = population_size)
         pareto_front = tools.ParetoFront()
 
-      
+
         algorithms.eaMuPlusLambda(population, self.toolbox, population_size, num_children, crossover_rate, mutation_rate, num_generations, halloffame = pareto_front, verbose = False)
-        
+
         release_plans = []
+        max_benefit, max_penalty = 0, 0
         for release_plan in pareto_front:
+            penalty, benefit = release_plan.fitness.values
+
+            if penalty > max_penalty: max_penalty = penalty
+            if benefit > max_benefit: max_benefit = benefit
+
             release_plans.append({
-                "penalty": release_plan.fitness.values[0],
-                "benefit": release_plan.fitness.values[1],
+                "penalty": penalty,
+                "benefit": benefit,
                 "releases": self.map_features_to_releases(release_plan)
             })
 
-        return release_plans
-        
+        return release_plans, max_penalty, max_benefit
+
 
     def transform_features(self, features):
         self.features = {}
@@ -64,7 +70,7 @@ class Evolve:
         effort = [0]*(self.num_releases+1)
         penalty = 0
         benefit = 0
-        
+
         for feature, release in enumerate(individual):
             for feature2, release2 in enumerate(individual):
                 if feature2 < feature:
@@ -81,7 +87,7 @@ class Evolve:
                         penalty += abs(release - release2)
                     else:
                         penalty += (self.features[feature][1]-self.features[feature2][1])*(release2 - release)
-                        
+
             if release!=0:
                 benefit += self.features[feature][2]*(self.num_releases - release + 1)
                 effort[release] += self.features[feature][0]
@@ -99,9 +105,9 @@ class Evolve:
         result_1 = ind1
 
         result_2 = ind2
-        
+
         rnd1, rnd2 = random.sample(range(0, self.num_features - 1), 2)
-        
+
         result_1[rnd1] = ind2[rnd1]
         result_1[rnd2] = ind2[rnd2]
 
@@ -113,7 +119,7 @@ class Evolve:
 
 
     def mutSet(self, individual):
-     
+
         individual[random.randint(0, self.num_features - 1)] = random.randint(0, self.num_releases)
         return individual,
 

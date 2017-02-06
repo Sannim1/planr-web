@@ -1,171 +1,122 @@
 import random
 
-import numpy
-
 from deap import algorithms
 from deap import base
 from deap import creator
 from deap import tools
 
+class Evolve:
+    def __init__(self, features, num_releases, team_capacity):
+        self.transform_features(features)
+        self.num_features = len(features)
+        self.num_releases = num_releases
+        self.team_capacity = team_capacity
 
-NBR_FEAT = 20
-NBR_RELEASE = 4
+        self.initialize_algorithm()
 
-TEAM_CAP = 50
+    def initialize_algorithm(self):
+        creator.create("Fitness", base.Fitness, weights=(-1.0, 1.0))
+        creator.create("Individual", list, fitness=creator.Fitness)
 
+        self.toolbox = base.Toolbox()
+        self.toolbox.register("attr_feat", random.randint, 0, self.num_releases)
 
-#random.seed(64)
+        self.toolbox.register("individual", tools.initRepeat, creator.Individual, self.toolbox.attr_feat, self.num_features)
+        self.toolbox.register("population", tools.initRepeat, list, self.toolbox.individual)
 
-#Create the feature dictionary: feature name is an integer, and value is
-#a (effort, value) 2-uple
-features = {} 
+        self.toolbox.register("evaluate", self.evalReleasePlan)
+        self.toolbox.register("mate", self.cxSet)
+        self.toolbox.register("mutate", self.mutSet)
+        self.toolbox.register("select", tools.selNSGA2)
 
-for i in range(NBR_FEAT):
-    features[i] = (random.randint(1,10), random.randint(1, 4), random.uniform(0, 100))
+    def generate(self):
+        num_generations = 100
+        population_size = 50
+        num_children = 100
+        crossover_rate = 0.7
+        mutation_rate = 0.3
 
+        population = self.toolbox.population(n = population_size)
+        pareto_front = tools.ParetoFront()
 
-#Individual is a RP
-creator.create("Fitness", base.Fitness, weights=(-1.0, 1.0))
-creator.create("Individual", list, fitness=creator.Fitness)
+      
+        algorithms.eaMuPlusLambda(population, self.toolbox, population_size, num_children, crossover_rate, mutation_rate, num_generations, halloffame = pareto_front, verbose = False)
+        
+        release_plans = []
+        for release_plan in pareto_front:
+            release_plans.append({
+                "penalty": release_plan.fitness.values[0],
+                "benefit": release_plan.fitness.values[1],
+                "releases": self.map_features_to_releases(release_plan)
+            })
 
-toolbox = base.Toolbox()
-toolbox.register("attr_feat", random.randint, 0, NBR_RELEASE)
+        return release_plans
+        
 
-toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_feat, NBR_FEAT)
-toolbox.register("population", tools.initRepeat, list, toolbox.individual)
-
-def evalReleasePlan(individual):
-    effort = [0]*(NBR_RELEASE+1)
-    penalty = 0
-    benefit = 0
-    
-    for feature, release in enumerate(individual):
-    	for feature2, release2 in enumerate(individual):
-            if feature2 < feature:
-                if (features[feature][1]-features[feature2][1])*(release - release2) > 0:
-                    penalty += 0
-                elif release == release2:
-                    penalty += abs(features[feature][1]-features[feature2][1])
-                elif features[feature][1] == features[feature2][1]:
-                    penalty += abs(release - release2)
-                else:
-                    penalty += (features[feature][1]-features[feature2][1])*(release2 - release)
-                    
-        if release!=0:
-            benefit += features[feature][2]*(NBR_RELEASE - release + 1)
-            effort[release] += features[feature][0]
-        if effort[release] > TEAM_CAP :
-            return 10000, 0
-    return penalty, benefit
-
-
-def cxSet(ind1, ind2):
-    """Apply a crossover operation on input sets."""
-
-    if (NBR_FEAT < 2):
-    	return ind1, ind2
-
-    result_1 = ind1
-
-    result_2 = ind2
-    
-    rnd1, rnd2 = random.sample(range(0, NBR_FEAT-1), 2)
-    
-    result_1[rnd1] = ind2[rnd1]
-    result_1[rnd2] = ind2[rnd2]
-
-    result_2[rnd1] = ind1[rnd1]
-    result_2[rnd2] = ind1[rnd2]
-
-    return result_1, result_2
+    def transform_features(self, features):
+        self.features = {}
+        for index, feature in enumerate(features):
+            self.features[index] = (feature["effort"], feature["priority"], feature["business_value"], feature["id"])
+        return
 
 
+    def evalReleasePlan(self, individual):
+        effort = [0]*(self.num_releases+1)
+        penalty = 0
+        benefit = 0
+        
+        for feature, release in enumerate(individual):
+            for feature2, release2 in enumerate(individual):
+                if feature2 < feature:
+                    if (self.features[feature][1]-self.features[feature2][1])*(release - release2) > 0:
+                        penalty += 0
+                    elif release == release2:
+                        penalty += abs(self.features[feature][1]-self.features[feature2][1])
+                    elif self.features[feature][1] == self.features[feature2][1]:
+                        penalty += abs(release - release2)
+                    else:
+                        penalty += (self.features[feature][1]-self.features[feature2][1])*(release2 - release)
+                        
+            if release!=0:
+                benefit += self.features[feature][2]*(self.num_releases - release + 1)
+                effort[release] += self.features[feature][0]
+            if effort[release] > self.team_capacity :
+                return 10000, 0
+        return penalty, benefit
 
-def mutSet(individual):
-    '''
-    fromIndex = random.randint(0, NBR_FEAT-1) 
-    toIndex = random.randint(0, NBR_FEAT-1)
-    
-    if fromIndex == toIndex:
-        return individual
-    else:
-        tmp = individual[fromIndex]
-        individual[fromIndex] = individual[toIndex]
-        individual[toIndex] = tmp
-    return individual
-    '''
-    individual[random.randint(0, NBR_FEAT-1)] = random.randint(0, NBR_RELEASE)
-    return individual,
 
-toolbox.register("evaluate", evalReleasePlan)
-toolbox.register("mate", tools.cxOrdered)
-toolbox.register("mutate", mutSet)
-toolbox.register("select", tools.selNSGA2)
+    def cxSet(self, ind1, ind2):
+        """Apply a crossover operation on input sets."""
 
-def main():
-    random.seed(64)
-    NGEN = 100
-    MU = 50
-    LAMBDA = 100
-    CXPB = 0.7
-    MUTPB = 0.3
+        if (self.num_features < 2):
+        	return ind1, ind2
 
-    pop = toolbox.population(n=MU)
-    hof = tools.ParetoFront()
+        result_1 = ind1
 
-    stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("avg", numpy.mean, axis=0)
-    stats.register("std", numpy.std, axis=0)
-    stats.register("min", numpy.min, axis=0)
-    stats.register("max", numpy.max, axis=0)
-    #stats.register("solution", numpy.)
-    algorithms.eaMuPlusLambda(pop, toolbox, MU, LAMBDA, CXPB, MUTPB, NGEN,
-            stats, halloffame=hof)
-    
-    return pop, stats, hof
-                 
-if __name__ == "__main__":
-    pop,stats,hof = main()
+        result_2 = ind2
+        
+        rnd1, rnd2 = random.sample(range(0, self.num_features - 1), 2)
+        
+        result_1[rnd1] = ind2[rnd1]
+        result_1[rnd2] = ind2[rnd2]
 
-for i in hof:
-    print i, i.fitness.values
+        result_2[rnd1] = ind1[rnd1]
+        result_2[rnd2] = ind1[rnd2]
 
-print "last pop"
-print pop[len(pop)-1], pop[len(pop)-1].fitness.values
-
-'''
-    _, _, hof = main()
-    '''
-'''
-    print hof[len(hof)-1].fitness.values[0]
-    print hof[len(hof)-1].fitness.values[1]
-    print hof[len(hof)-1]
-
-    print hof[0].fitness.values[0]
-    print hof[0].fitness.values[1]
-    print hof[0]'''
-'''
-    from matplotlib import pyplot as plt
-    effort = [i.fitness.values[0] for i in hof]
-    bvalue = [i.fitness.values[1] for i in hof]
-    plt.plot(effort, bvalue, 'bo')
-    plt.xlabel("Penalty")
-    plt.ylabel("Bussiness Value")
-    plt.show()
-
-'''
-'''
-    for i in hof:
-    	print i;
-	'''
-	# print hof
-    # print hof(len(hof)-1).fitness.values[0]
-    # print hof(len(hof)-1).fitness.values[1]
-    
+        return result_1, result_2
 
 
 
+    def mutSet(self, individual):
+     
+        individual[random.randint(0, self.num_features - 1)] = random.randint(0, self.num_releases)
+        return individual,
 
-
-
-
+    def map_features_to_releases(self, release_plan):
+        releases = {}
+        for index, release in enumerate(release_plan):
+            if release not in releases:
+                releases[release] = []
+            feature_id = self.features[index][3]
+            releases[release].append(feature_id)
+        return releases

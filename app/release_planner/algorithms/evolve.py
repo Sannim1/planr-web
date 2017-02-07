@@ -100,7 +100,7 @@ class Evolve:
     def cxSet(self, ind1, ind2):
         """Apply a crossover operation on input sets."""
 
-        if (self.num_features < 2):
+        if (self.num_features <= 2):
         	return ind1, ind2
 
         result_1 = ind1

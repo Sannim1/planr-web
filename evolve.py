@@ -68,7 +68,12 @@ class Evolve:
         for feature, release in enumerate(individual):
             for feature2, release2 in enumerate(individual):
                 if feature2 < feature:
-                    if (self.features[feature][1]-self.features[feature2][1])*(release - release2) > 0:
+                    if release == 0 or release2 == 0:
+                        if release == 0:
+                            penalty += self.features[feature][1]*self.num_releases
+                        if release2 == 0:
+                            penalty += self.features[feature2][1]*self.num_releases
+                    elif (self.features[feature][1]-self.features[feature2][1])*(release - release2) > 0:
                         penalty += 0
                     elif release == release2:
                         penalty += abs(self.features[feature][1]-self.features[feature2][1])

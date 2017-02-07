@@ -43,11 +43,15 @@ class Evolve:
         algorithms.eaMuPlusLambda(population, self.toolbox, population_size, num_children, crossover_rate, mutation_rate, num_generations, halloffame = pareto_front, verbose = False)
 
         release_plans = []
-        max_benefit, max_penalty = 0, 0
+        min_penalty, max_penalty = 0, 0
+        min_benefit, max_benefit = 0, 0
         for release_plan in pareto_front:
             penalty, benefit = release_plan.fitness.values
 
+            if penalty < min_penalty: min_penalty = penalty
             if penalty > max_penalty: max_penalty = penalty
+
+            if benefit < min_benefit: min_benefit = benefit
             if benefit > max_benefit: max_benefit = benefit
 
             release_plans.append({
@@ -56,7 +60,13 @@ class Evolve:
                 "releases": self.map_features_to_releases(release_plan)
             })
 
-        return release_plans, max_penalty, max_benefit
+        return {
+            "release_plans": release_plans,
+            "min_penalty": min_penalty,
+            "max_penalty": max_penalty,
+            "min_benefit": min_benefit,
+            "max_benefit": max_benefit
+        }
 
 
     def transform_features(self, features):

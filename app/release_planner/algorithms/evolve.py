@@ -71,13 +71,15 @@ class Evolve:
         penalty = 0
         benefit = 0
 
-        if release!=0:
-            benefit += self.features[feature][2]*(self.num_releases - release + 1)
-            effort[release] += self.features[feature][0]
-        if effort[release] > self.team_capacity :
-            return 10000, 0
         
         for feature, release in enumerate(individual):
+
+            if release!=0:
+                benefit += self.features[feature][2]*(self.num_releases - release + 1)
+                effort[release] += self.features[feature][0]
+            if effort[release] > self.team_capacity :
+                return 10000, 0
+                
             for feature2, release2 in enumerate(individual):
                 if feature2 < feature:
                     if release == 0 or release2 == 0:

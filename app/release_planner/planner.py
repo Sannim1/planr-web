@@ -1,33 +1,49 @@
-import random
-
+from algorithms.evolve import Evolve
 class Planner:
     def __init__(self):
-        self._optimization_criteria = [0.2, 0.5, 0.8]
         return
 
-    def request_plans(self, features, team_capacity, number_of_releases):
+    def request_plans(self, features, team_capacity, num_releases):
+        planning_model = Evolve(features, num_releases, team_capacity)
+        generated = planning_model.generate()
+        generated_plans = generated["release_plans"]
+        min_benefit = generated["min_benefit"]
+        max_benefit = generated["max_benefit"]
+        min_penalty = generated["min_penalty"]
+        max_penalty = generated["max_penalty"]
+
         release_plans = []
-        for e in xrange(3):
-            mock_releases = self.get_mock_releases(features, number_of_releases)
+        for generated_plan in generated_plans:
             release_plans.append({
-                "optimization_criteria": self._optimization_criteria[e],
-                "releases": mock_releases
+                "tradeoff": {
+                    "priority": self.scale_penalty(generated_plan["penalty"], min_penalty, max_penalty),
+                    "business_value": self.scale_benefit(generated_plan["penalty"], min_benefit, max_benefit)
+                },
+                "releases": self.transform_releases(generated_plan["releases"])
             })
+
         return release_plans
 
-    def get_mock_releases(self, features, number_of_releases):
-        releases = []
-        features_per_release = len(features) / number_of_releases
-        features = list(features)
-        for e in xrange(1, number_of_releases + 1):
-            _features = features
-            if e != number_of_releases:
-                _features = random.sample(features, features_per_release)
-                for _f in _features:
-                    features.remove(_f)
+    def scale_penalty(self, penalty, min_penalty, max_penalty):
+        scaled_value = 1
+        if max_penalty != min_penalty:
+            scaled_value = (max_penalty - penalty) / ((max_penalty - min_penalty) * 1.0)
+        return scaled_value * 100
 
+    def scale_benefit(self, benefit, min_benefit, max_benefit):
+        scaled_value = 1
+        if max_benefit != min_benefit:
+            scaled_value = (benefit - min_benefit) / ((max_benefit - min_benefit) * 1.0)
+        return scaled_value * 100
+
+    def transform_releases(self, generated_releases):
+        releases = []
+        for order, _features in generated_releases.items():
+            features = []
+            for feature_id in _features:
+                features.append({"id": feature_id})
             releases.append({
-                "order": e,
-                "features": _features
+                "order": order,
+                "features": features
             })
         return releases

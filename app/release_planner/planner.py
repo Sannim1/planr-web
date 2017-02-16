@@ -1,4 +1,5 @@
 from algorithms.evolve import Evolve
+
 class Planner:
     def __init__(self):
         return
@@ -17,7 +18,7 @@ class Planner:
             release_plans.append({
                 "tradeoff": {
                     "priority": self.scale_penalty(generated_plan["penalty"], min_penalty, max_penalty),
-                    "business_value": self.scale_benefit(generated_plan["penalty"], min_benefit, max_benefit)
+                    "business_value": self.scale_benefit(generated_plan["benefit"], min_benefit, max_benefit)
                 },
                 "releases": self.transform_releases(generated_plan["releases"])
             })
@@ -28,13 +29,13 @@ class Planner:
         scaled_value = 1
         if max_penalty != min_penalty:
             scaled_value = (max_penalty - penalty) / ((max_penalty - min_penalty) * 1.0)
-        return scaled_value * 100
+        return scaled_value * 100.
 
     def scale_benefit(self, benefit, min_benefit, max_benefit):
         scaled_value = 1
         if max_benefit != min_benefit:
             scaled_value = (benefit - min_benefit) / ((max_benefit - min_benefit) * 1.0)
-        return scaled_value * 100
+        return scaled_value * 100.
 
     def transform_releases(self, generated_releases):
         releases = []

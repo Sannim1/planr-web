@@ -8,11 +8,23 @@
         "description": "A single release plan",
         "type": "object",
         "properties": {
-            "optimization_criteria": {
-                "description": "A value representing how much business value was considered over priority in generating the release plan",
-                "type": "float",
-                "minimum": 0.0,
-                "maximum": 1.0
+            "tradeoff": {
+                "description": "A value representing how much business value and priority were considered in optimizing the release plan",
+                "type": "object",
+                "properties": {
+                    "priority": {
+                        "description": "The percentage value of priority considered in optimizing the release plan",
+                        "type": "float",
+                        "minimum": 0.0,
+                        "maximum": 100.0
+                    },
+                    "business_value": {
+                        "description": "The percentage value of business value considered in optimizing the release plan",
+                        "type": "float",
+                        "minimum": 0.0,
+                        "maximum": 100.0
+                    }
+                }
             },
             "releases": {
                 "description": "A collection of releases in this release plan",

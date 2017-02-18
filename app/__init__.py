@@ -1,9 +1,11 @@
 # Import flask and template operators
 from flask import Flask, make_response, jsonify, request
+from flask_cors import CORS, cross_origin
 from werkzeug.exceptions import BadRequest
 
 # Define the WSGI application object
 app = Flask(__name__, instance_relative_config = True)
+CORS(app)
 
 # Configurations
 app.config.from_object('config')

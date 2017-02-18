@@ -27,8 +27,21 @@ class ReleasePlanRequestValidator:
             return False
 
         feature_validator = FeatureValidator()
+        feature_ids = []
+        # validate required feature fields
         for feature in release_plan_request['features']:
             if not feature_validator.validate(feature):
+                self.add_error(feature_validator.errors()[0])
+                return False
+            feature_ids.append(feature["id"])
+
+        # validate optional feature fields
+        for feature in release_plan_request['features']:
+            if not feature_validator.validate_precedence(feature, feature_ids):
+                self.add_error(feature_validator.errors()[0])
+                return False
+
+            if not feature_validator.validate_coupling(feature, feature_ids):
                 self.add_error(feature_validator.errors()[0])
                 return False
 
@@ -73,9 +86,38 @@ class FeatureValidator:
 
         return True
 
+    def validate_precedence(self, feature, feature_ids):
+        if "preceded_by" not in feature:
+            return True
+        if not isinstance(feature["preceded_by"], int):
+            self.add_error("The preceded_by field of feature:{0} must be an integer".format(feature["id"]))
+            return False
+        if feature["preceded_by"] not in feature_ids:
+            self.add_error("Feature:{0} can only be preceded by a feature in the same release plan request".format(feature["id"]))
+            return False
+        if feature["preceded_by"] == feature["id"]:
+            self.add_error("Feature:{0} cannot be preceded by itself".format(feature["id"]))
+            return False
+
+        return True
+
+    def validate_coupling(self, feature, feature_ids):
+        if "coupled_with" not in feature:
+            return True
+        if not isinstance(feature["coupled_with"], int):
+            self.add_error("The coupled_with field of feature:{0} must be an integer".format(feature["id"]))
+            return False
+        if feature["coupled_with"] not in feature_ids:
+            self.add_error("Feature:{0} can only be coupled with a feature in the same release plan request".format(feature["id"]))
+            return False
+        if feature["coupled_with"] == feature["id"]:
+            self.add_error("Feature:{0} cannot be coupled to itself".format(feature["id"]))
+            return False
+
+        return True
+
     def add_error(self, error_message):
         self._errors.append(error_message)
 
     def errors(self):
         return self._errors
-

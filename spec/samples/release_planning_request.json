@@ -4,7 +4,9 @@
             "id": "integer/required",
             "priority": "integer/required",
             "business_value": "integer/required",
-            "effort": "integer/required"
+            "effort": "integer/required",
+            "preceded_by": "integer/optional",
+            "coupled_with": "integer/optional"
         },
         {},
         {}

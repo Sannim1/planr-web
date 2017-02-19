@@ -27,6 +27,14 @@
                     "effort": {
                         "description": "An estimate of the number of hours required to complete this feature",
                         "type": "integer",
+                    },
+                    "preceded_by": {
+                        "description": "The ID of a feature which must belong to a release that comes before or is the same as that of the current feature",
+                        "type": "integer"
+                    },
+                    "coupled_with": {
+                        "description": "The ID of a feature which must be in the same release as the current feature",
+                        "type": "integer"
                     }
                 },
                 "required": ["id", "priority", "business_value", "effort"]

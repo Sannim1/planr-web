@@ -1,4 +1,5 @@
 import random
+import sys
 
 from deap import algorithms
 from deap import base
@@ -75,6 +76,11 @@ class Evolve:
             self.features[index] = (feature["effort"], feature["priority"], feature["business_value"], feature["id"])
         return
 
+    def getFeatureIndex(self, featureID):
+        for i in range(len(self.features)):
+            if self.features[i][3] == featureID:
+                return i
+        return None
 
     def evalReleasePlan(self, individual):
         effort = [0]*(self.num_releases+1)
@@ -95,12 +101,23 @@ class Evolve:
 
         
         for feature, release in enumerate(individual):
+            if self.features[feature][4] != None:
+                precedenceIndex = getFeatureIndex(self.features[feature][4])
+                precedenceRelease = individual[precedenceIndex]
+                if release < precedenceRelease:
+                    return sys.maxint, 0
+
+            if self.features[feature][5] != None:
+                couplingIndex = getFeatureIndex(self.features[feature][5])
+                couplingRelease = individual[precedenceIndex]
+                if release != precedenceRelease:
+                    return sys.maxint, 0
 
             if release!=0:
                 benefit += self.features[feature][2]*(self.num_releases - release + 1)
                 effort[release] += self.features[feature][0]
             if effort[release] > self.team_capacity :
-                return 10000, 0
+                return sys.maxint, 0
                 
             for feature2, release2 in enumerate(individual):
                 if feature2 < feature:

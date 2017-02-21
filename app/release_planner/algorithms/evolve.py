@@ -99,7 +99,7 @@ class Evolve:
                 is_all_features_on_first_release = False
 
         if self.team_capacity >= sum_features_effort and not is_all_features_on_first_release:
-            return 10000,0
+            return sys.maxint,0
 
         
         for feature, release in enumerate(individual):

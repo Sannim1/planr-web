@@ -73,7 +73,9 @@ class Evolve:
     def transform_features(self, features):
         self.features = {}
         for index, feature in enumerate(features):
-            self.features[index] = (feature["effort"], feature["priority"], feature["business_value"], feature["id"])
+            self.features[index] = (feature["effort"], feature["priority"],
+                    feature["business_value"], feature["id"],
+                    feature["preceded_by"], feature["coupled_with"])
         return
 
     def getFeatureIndex(self, featureID):

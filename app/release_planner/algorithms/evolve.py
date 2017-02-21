@@ -82,6 +82,18 @@ class Evolve:
         benefit = 0
 
         
+
+        sum_features_effort = 0
+        is_all_features_on_first_release = True
+        for feature, release in enumerate(individual):
+            sum_features_effort += self.features[feature][0]
+            if release != 1:
+                is_all_features_on_first_release = False
+
+        if self.team_capacity >= sum_features_effort and not is_all_features_on_first_release:
+            return 10000,0
+
+        
         for feature, release in enumerate(individual):
 
             if release!=0:

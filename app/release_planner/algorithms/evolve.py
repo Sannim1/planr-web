@@ -73,9 +73,15 @@ class Evolve:
     def transform_features(self, features):
         self.features = {}
         for index, feature in enumerate(features):
-            self.features[index] = (feature["effort"], feature["priority"],
+            transformed_feature = (feature["effort"], feature["priority"],
                     feature["business_value"], feature["id"],
-                    feature["preceded_by"], feature["coupled_with"])
+                    None, None)
+            if "preceded_by" in feature:
+                transformed_feature[4] = feature["preceded_by"]
+            if "coupled_with" in feature:
+                transformed_feature[5] = feature["coupled_with"]
+
+            self.features[index] = transformed_feature
         return
 
     def getFeatureIndex(self, featureID):
@@ -89,7 +95,7 @@ class Evolve:
         penalty = 0
         benefit = 0
 
-        
+
 
         sum_features_effort = 0
         is_all_features_on_first_release = True
@@ -101,7 +107,7 @@ class Evolve:
         if self.team_capacity >= sum_features_effort and not is_all_features_on_first_release:
             return sys.maxint,0
 
-        
+
         for feature, release in enumerate(individual):
             if self.features[feature][4] != None:
                 precedenceIndex = getFeatureIndex(self.features[feature][4])
@@ -120,7 +126,7 @@ class Evolve:
                 effort[release] += self.features[feature][0]
             if effort[release] > self.team_capacity :
                 return sys.maxint, 0
-                
+
             for feature2, release2 in enumerate(individual):
                 if feature2 < feature:
                     if release == 0 or release2 == 0:
@@ -136,7 +142,7 @@ class Evolve:
                         penalty += abs(release - release2)
                     else:
                         penalty += (self.features[feature][1]-self.features[feature2][1])*(release2 - release)
-                        
+
         return penalty, benefit
 
 

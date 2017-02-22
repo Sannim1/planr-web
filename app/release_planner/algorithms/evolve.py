@@ -31,6 +31,29 @@ class Evolve:
         self.toolbox.register("select", tools.selNSGA2)
 
     def generate(self):
+
+        sum_features_effort = 0
+        for feature in self.features:
+            sum_features_effort += feature[0]
+
+        if self.team_capacity >= sum_features_effort:
+            release_plan = [1] * self.num_features
+            release_plans = [release_plan]
+            release_plans.append({
+                "penalty": 0,
+                "benefit": 100,
+                "releases": self.map_features_to_releases(release_plan)
+            })
+
+        return {
+            "release_plans": release_plans,
+            "min_penalty": 0,
+            "max_penalty": 0,
+            "min_benefit": 100,
+            "max_benefit": 100
+        }
+
+
         num_generations = 100
         population_size = 50
         num_children = 100
@@ -94,19 +117,6 @@ class Evolve:
         effort = [0]*(self.num_releases+1)
         penalty = 0
         benefit = 0
-
-
-
-        sum_features_effort = 0
-        is_all_features_on_first_release = True
-        for feature, release in enumerate(individual):
-            sum_features_effort += self.features[feature][0]
-            if release != 1:
-                is_all_features_on_first_release = False
-
-        if self.team_capacity >= sum_features_effort and not is_all_features_on_first_release:
-            return sys.maxint,0
-
 
         for feature, release in enumerate(individual):
             if self.features[feature][4] != None:

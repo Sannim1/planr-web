@@ -30,28 +30,35 @@ class Evolve:
         self.toolbox.register("mutate", self.mutSet)
         self.toolbox.register("select", tools.selNSGA2)
 
-    def generate(self):
-
+    def team_capacity_exceeds_sum_effort(self):
         sum_features_effort = 0
-        for feature in self.features:
-            sum_features_effort += feature[0]
+        for index in self.features:
+            sum_features_effort += self.features[index][0]
 
         if self.team_capacity >= sum_features_effort:
+            return True;
+        return False;
+
+
+    def generate(self):
+
+        if self.team_capacity_exceeds_sum_effort():
             release_plan = [1] * self.num_features
-            release_plans = [release_plan]
+            release_plans = []
+            min_penalty, max_penalty = 0, 0
+            min_benefit, max_benefit = 100, 100
             release_plans.append({
-                "penalty": 0,
-                "benefit": 100,
+                "penalty": min_penalty,
+                "benefit": max_benefit,
                 "releases": self.map_features_to_releases(release_plan)
             })
-
-        return {
-            "release_plans": release_plans,
-            "min_penalty": 0,
-            "max_penalty": 0,
-            "min_benefit": 100,
-            "max_benefit": 100
-        }
+            return {
+                "release_plans": release_plans,
+                "min_penalty": min_penalty,
+                "max_penalty": max_penalty,
+                "min_benefit": min_benefit,
+                "max_benefit": max_benefit
+            }
 
 
         num_generations = 100

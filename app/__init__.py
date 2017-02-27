@@ -9,7 +9,6 @@ CORS(app)
 
 # Configurations
 app.config.from_object('config')
-app.config.from_pyfile('config.py')
 
 @app.before_request
 def before_request():

@@ -103,13 +103,14 @@ class Evolve:
     def transform_features(self, features):
         self.features = {}
         for index, feature in enumerate(features):
+            preceded_by, coupled_with = None, None
+            if "preceded_by" in feature:
+                preceded_by = feature["preceded_by"]
+            if "coupled_with" in feature:
+                coupled_with = feature["coupled_with"]
             transformed_feature = (feature["effort"], feature["priority"],
                     feature["business_value"], feature["id"],
-                    None, None)
-            if "preceded_by" in feature:
-                transformed_feature[4] = feature["preceded_by"]
-            if "coupled_with" in feature:
-                transformed_feature[5] = feature["coupled_with"]
+                    preceded_by, coupled_with)
 
             self.features[index] = transformed_feature
         return
@@ -127,15 +128,15 @@ class Evolve:
 
         for feature, release in enumerate(individual):
             if self.features[feature][4] != None:
-                precedenceIndex = getFeatureIndex(self.features[feature][4])
+                precedenceIndex = self.getFeatureIndex(self.features[feature][4])
                 precedenceRelease = individual[precedenceIndex]
-                if release < precedenceRelease:
+                if release < precedenceRelease or (release > precedenceRelease and precedenceRelease == 0):
                     return sys.maxint, 0
 
             if self.features[feature][5] != None:
-                couplingIndex = getFeatureIndex(self.features[feature][5])
-                couplingRelease = individual[precedenceIndex]
-                if release != precedenceRelease:
+                couplingIndex = self.getFeatureIndex(self.features[feature][5])
+                couplingRelease = individual[couplingIndex]
+                if release != couplingRelease:
                     return sys.maxint, 0
 
             if release!=0:

@@ -5,6 +5,7 @@ class Planner:
         return
 
     def request_plans(self, features, team_capacity, num_releases):
+        features = self.sanitize_features(features)
         planning_model = Evolve(features, num_releases, team_capacity)
         generated = planning_model.generate()
         generated_plans = generated["release_plans"]
@@ -24,6 +25,18 @@ class Planner:
             })
 
         return release_plans
+
+    def sanitize_features(self, features):
+        # loop through all of the features and check that a feature is not
+        # preceded by or coupled with itself
+        for feature in features:
+            if "preceded_by" in feature:
+                if feature["id"] == feature["preceded_by"]:
+                    feature["preceded_by"] = None
+            if "coupled_with" in feature:
+                if feature["id"] == feature["coupled_with"]:
+                    feature["coupled_with"] = None
+        return features
 
     def scale_penalty(self, penalty, min_penalty, max_penalty):
         scaled_value = 1

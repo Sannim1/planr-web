@@ -95,9 +95,6 @@ class FeatureValidator:
         if feature["preceded_by"] not in feature_ids:
             self.add_error("Feature:{0} can only be preceded by a feature in the same release plan request".format(feature["id"]))
             return False
-        if feature["preceded_by"] == feature["id"]:
-            self.add_error("Feature:{0} cannot be preceded by itself".format(feature["id"]))
-            return False
 
         return True
 
@@ -109,9 +106,6 @@ class FeatureValidator:
             return False
         if feature["coupled_with"] not in feature_ids:
             self.add_error("Feature:{0} can only be coupled with a feature in the same release plan request".format(feature["id"]))
-            return False
-        if feature["coupled_with"] == feature["id"]:
-            self.add_error("Feature:{0} cannot be coupled to itself".format(feature["id"]))
             return False
 
         return True

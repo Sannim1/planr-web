@@ -56,7 +56,7 @@ class ReleasePlanRequestValidator:
 class FeatureValidator:
     def __init__(self):
         self._errors = []
-        self._required_fields = ["id", "business_value", "effort", "priority"]
+        self._required_fields = ["business_value", "effort", "priority"]
         return
 
     def validate(self, feature):
@@ -66,14 +66,17 @@ class FeatureValidator:
         if len(feature) == 0:
             self.add_error("A feature object cannot be empty")
             return False
-        for required_field in self._required_fields:
-            if required_field not in feature:
-                error_message = str(required_field) + " is a required field of a feature"
-                self.add_error(error_message)
-                return False
+        if "id" not in feature:
+            self.add_error("ID is a required field of a feature")
+            return False
         if not isinstance(feature["id"], int):
             self.add_error("The ID field of a feature must be an integer")
             return False
+        for required_field in self._required_fields:
+            if required_field not in feature:
+                error_message = str(required_field) + " is a required field of feature:" + str(feature['id'])
+                self.add_error(error_message)
+                return False
         if not isinstance(feature["business_value"], int):
             self.add_error("The business_value field of feature:" + str(feature['id']) + " must be an integer")
             return False

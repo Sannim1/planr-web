@@ -12,6 +12,7 @@ class Evolve:
         self.num_features = len(features)
         self.num_releases = num_releases
         self.team_capacity = team_capacity
+        self.min_priority = 4
 
         self.initialize_algorithm()
 
@@ -102,6 +103,7 @@ class Evolve:
 
     def transform_features(self, features):
         self.features = {}
+        self.feature_id_to_index = {}
         for index, feature in enumerate(features):
             preceded_by, coupled_with = None, None
             if "preceded_by" in feature:
@@ -111,15 +113,9 @@ class Evolve:
             transformed_feature = (feature["effort"], feature["priority"],
                     feature["business_value"], feature["id"],
                     preceded_by, coupled_with)
-
             self.features[index] = transformed_feature
+            self.feature_id_to_index[feature["id"]] = index
         return
-
-    def getFeatureIndex(self, featureID):
-        for i in range(len(self.features)):
-            if self.features[i][3] == featureID:
-                return i
-        return None
 
     def evalReleasePlan(self, individual):
         effort = [0]*(self.num_releases+1)
@@ -128,39 +124,28 @@ class Evolve:
 
         for feature, release in enumerate(individual):
             if self.features[feature][4] != None:
-                precedenceIndex = self.getFeatureIndex(self.features[feature][4])
+                precedenceIndex = self.feature_id_to_index[self.features[feature][4]]
                 precedenceRelease = individual[precedenceIndex]
                 if release < precedenceRelease or (release > precedenceRelease and precedenceRelease == 0):
                     return sys.maxint, 0
 
             if self.features[feature][5] != None:
-                couplingIndex = self.getFeatureIndex(self.features[feature][5])
+                couplingIndex = self.feature_id_to_index[self.features[feature][5]]
                 couplingRelease = individual[couplingIndex]
                 if release != couplingRelease:
                     return sys.maxint, 0
 
-            if release!=0:
+            if release !=0:
                 benefit += self.features[feature][2]*(self.num_releases - release + 1)
                 effort[release] += self.features[feature][0]
+                penalty += (self.min_priority + 1 - self.features[feature][1])*(release)
+            else:
+                penalty += (self.min_priority + 1 - self.features[feature][1])*(self.num_releases + 1)
+                
             if effort[release] > self.team_capacity :
                 return sys.maxint, 0
 
-            for feature2, release2 in enumerate(individual):
-                if feature2 < feature:
-                    if release == 0 or release2 == 0:
-                        if release == 0:
-                            penalty += self.features[feature][1]*self.num_releases
-                        if release2 == 0:
-                            penalty += self.features[feature2][1]*self.num_releases
-                    elif (self.features[feature][1]-self.features[feature2][1])*(release - release2) > 0:
-                        penalty += 0
-                    elif release == release2:
-                        penalty += abs(self.features[feature][1]-self.features[feature2][1])
-                    elif self.features[feature][1] == self.features[feature2][1]:
-                        penalty += abs(release - release2)
-                    else:
-                        penalty += (self.features[feature][1]-self.features[feature2][1])*(release2 - release)
-
+            
         return penalty, benefit
 
 

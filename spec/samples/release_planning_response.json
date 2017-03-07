@@ -1,24 +1,30 @@
-[
-    {
-        "tradeoff": {
-            "business_value": "float/min:0.0, max:100.0",
-            "priority": "float/min:0.0, max:100.0"
-        },
-        "releases": [
-            {
-                "order": "integer/min:1, max:number_of_releases",
-                "features": [
-                    {
-                        "id": "integer/required"
-                    },
-                    {/* FEATURE 2 */},
-                    {/* FEATURE 3 */}
-                ]
+{
+    "data": [
+        {
+            "tradeoff": {
+                "business_value": "float/min:0.0, max:100.0",
+                "priority": "float/min:0.0, max:100.0"
             },
-            {/* RELEASE 2*/},
-            {/* RELEASE 3*/}
-        ]
-    },
-    {/* RELEASE PLAN 2 */},
-    {/* RELEASE PLAN 3 */}
-]
+            "releases": [
+                {
+                    "order": "integer/min:1, max:number_of_releases",
+                    "features": [
+                        {
+                            "id": "integer/required"
+                        },
+                        {/* FEATURE 2 */},
+                        {/* FEATURE 3 */}
+                    ]
+                },
+                {/* RELEASE 2*/},
+                {/* RELEASE 3*/}
+            ]
+        },
+        {/* RELEASE PLAN 2 */},
+        {/* RELEASE PLAN 3 */}
+    ],
+    "metadata": {
+        "optimal_release_plans": 3,
+        "all_release_plans": 22
+    }
+}

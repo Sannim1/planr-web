@@ -24,7 +24,11 @@ class Planner:
                 "releases": self.transform_releases(generated_plan["releases"])
             })
 
-        return release_plans
+        metadata = {}
+        metadata["optimal_release_plans"] = len(release_plans)
+        metadata["all_release_plans"] = 100 # update this when algorithm returns the correct value
+
+        return release_plans, metadata
 
     def sanitize_features(self, features):
         # loop through all of the features and check that a feature is not

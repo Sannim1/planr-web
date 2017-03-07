@@ -57,7 +57,10 @@ class ReleasePlannerRouteTests(unittest.TestCase):
 
         response_body = json.loads(result.data)
 
-        release_plan_one = response_body[0]
+        self.assertTrue("data" in response_body)
+        self.assertTrue("metadata" in response_body)
+
+        release_plan_one = response_body["data"][0]
 
         self.assertTrue("tradeoff" in release_plan_one)
         self.assertTrue("priority" in  release_plan_one["tradeoff"])

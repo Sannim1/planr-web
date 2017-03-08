@@ -46,7 +46,7 @@ class Evolve:
         fitnesses = map(toolbox.evaluate, pop)
         for ind, fit in zip(pop, fitnesses):
             ind.fitness.values = fit
-        
+
         halloffame.update(pop)
 
         for g in range(NGEN):
@@ -70,7 +70,7 @@ class Evolve:
             # Insert best individuals in the halloffame
             halloffame.update(pop)
 
-        
+
 
     def generate(self):
 
@@ -97,19 +97,17 @@ class Evolve:
 
         num_generations = 100
         population_size = 50
-        num_children = 100
-        crossover_rate = 0.7
-        mutation_rate = 0.3
+        # num_children = 100
+        crossover_rate = 0.9
+        mutation_rate = 0.2
 
         population = self.toolbox.population(n = population_size)
         pareto_front = tools.ParetoFront()
         halloffame = tools.HallOfFame(num_generations*population_size)
 
-        algorithms.eaMuPlusLambda(population, self.toolbox, population_size, num_children, crossover_rate, mutation_rate, num_generations, halloffame = halloffame, verbose = False)
+        self.custom_algorithm(population, self.toolbox, population_size, crossover_rate, mutation_rate, num_generations, halloffame)
         pareto_front.update(halloffame)
 
-        self.custom_algorithm(population, self.toolbox, population_size, crossover_rate, mutation_rate, num_generations, pareto_front)
-      
         release_plans = []
         min_penalty, max_penalty = 0, 0
         min_benefit, max_benefit = 0, 0

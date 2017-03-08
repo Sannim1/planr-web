@@ -41,6 +41,37 @@ class Evolve:
         return False;
 
 
+    def custom_algorithm(self, pop, toolbox, mu, CXPB, MUTPB, NGEN, halloffame):
+        # Evaluate the entire population
+        fitnesses = map(toolbox.evaluate, pop)
+        for ind, fit in zip(pop, fitnesses):
+            ind.fitness.values = fit
+        
+        halloffame.update(pop)
+
+        for g in range(NGEN):
+            # Select the next generation individuals
+            selected_population = toolbox.select(pop, len(pop))
+            # Clone the selected individuals
+            selected_population = map(toolbox.clone, selected_population)
+
+            # Apply crossover and mutation
+            offspring = algorithms.varAnd(selected_population, toolbox, CXPB, MUTPB)
+
+            # Evaluate the individuals with an invalid fitness
+            invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
+            fitnesses = map(toolbox.evaluate, invalid_ind)
+            for ind, fit in zip(invalid_ind, fitnesses):
+                ind.fitness.values = fit
+
+            # The population is replaced by selected population and offspring
+            pop[:] = toolbox.select(selected_population + offspring, mu)
+
+            # Insert best individuals in the halloffame
+            halloffame.update(pop)
+
+        
+
     def generate(self):
 
         if self.team_capacity_exceeds_sum_effort():
@@ -77,6 +108,8 @@ class Evolve:
         algorithms.eaMuPlusLambda(population, self.toolbox, population_size, num_children, crossover_rate, mutation_rate, num_generations, halloffame = halloffame, verbose = False)
         pareto_front.update(halloffame)
 
+        self.custom_algorithm(population, self.toolbox, population_size, crossover_rate, mutation_rate, num_generations, pareto_front)
+      
         release_plans = []
         min_penalty, max_penalty = 0, 0
         min_benefit, max_benefit = 0, 0

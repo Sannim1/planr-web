@@ -123,15 +123,13 @@ class Evolve:
         benefit = 0
 
         for feature, release in enumerate(individual):
-            if self.features[feature][4] != None and self.features[feature][4] 
-            != self.features[feature][3]:
+            if self.features[feature][4] != None and self.features[feature][4] != self.features[feature][3]:
                 precedenceIndex = self.feature_id_to_index[self.features[feature][4]]
                 precedenceRelease = individual[precedenceIndex]
                 if release < precedenceRelease or (release > precedenceRelease and precedenceRelease == 0):
                     return sys.maxint, 0
 
-            if self.features[feature][5] != None and self.features[feature][5] 
-            != self.features[feature][3]:
+            if self.features[feature][5] != None and self.features[feature][5] != self.features[feature][3]:
 
                 couplingIndex = self.feature_id_to_index[self.features[feature][5]]
                 couplingRelease = individual[couplingIndex]

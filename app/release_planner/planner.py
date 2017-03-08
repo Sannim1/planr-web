@@ -13,6 +13,7 @@ class Planner:
         max_benefit = generated["max_benefit"]
         min_penalty = generated["min_penalty"]
         max_penalty = generated["max_penalty"]
+        num_valid_generated_plans = generated["num_valid_release_plans"]
 
         release_plans = []
         for generated_plan in generated_plans:
@@ -26,7 +27,7 @@ class Planner:
 
         metadata = {}
         metadata["optimal_release_plans"] = len(release_plans)
-        metadata["all_release_plans"] = 100 # update this when algorithm returns the correct value
+        metadata["all_release_plans"] = len(num_valid_generated_plans) 
 
         return release_plans, metadata
 

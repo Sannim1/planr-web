@@ -70,9 +70,10 @@ class Evolve:
 
         population = self.toolbox.population(n = population_size)
         pareto_front = tools.ParetoFront()
+        halloffame = tools.HallOfFame(self.num_generations*self.population_size)
 
-
-        algorithms.eaMuPlusLambda(population, self.toolbox, population_size, num_children, crossover_rate, mutation_rate, num_generations, halloffame = pareto_front, verbose = False)
+        algorithms.eaMuPlusLambda(population, self.toolbox, population_size, num_children, crossover_rate, mutation_rate, num_generations, halloffame = halloffame, verbose = False)
+        pareto_front.update(halloffame)
 
         release_plans = []
         min_penalty, max_penalty = 0, 0
@@ -97,7 +98,8 @@ class Evolve:
             "min_penalty": min_penalty,
             "max_penalty": max_penalty,
             "min_benefit": min_benefit,
-            "max_benefit": max_benefit
+            "max_benefit": max_benefit,
+            "num_valid_release_plans": len(halloffame)
         }
 
 

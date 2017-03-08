@@ -27,7 +27,7 @@ class Planner:
 
         metadata = {}
         metadata["optimal_release_plans"] = len(release_plans)
-        metadata["all_release_plans"] = len(num_valid_generated_plans) 
+        metadata["all_release_plans"] = num_valid_generated_plans
 
         return release_plans, metadata
 

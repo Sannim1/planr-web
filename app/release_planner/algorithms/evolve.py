@@ -70,7 +70,7 @@ class Evolve:
 
         population = self.toolbox.population(n = population_size)
         pareto_front = tools.ParetoFront()
-        halloffame = tools.HallOfFame(self.num_generations*self.population_size)
+        halloffame = tools.HallOfFame(num_generations*population_size)
 
         algorithms.eaMuPlusLambda(population, self.toolbox, population_size, num_children, crossover_rate, mutation_rate, num_generations, halloffame = halloffame, verbose = False)
         pareto_front.update(halloffame)

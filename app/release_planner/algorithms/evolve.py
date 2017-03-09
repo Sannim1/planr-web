@@ -23,13 +23,16 @@ class Evolve:
         self.toolbox = base.Toolbox()
         self.toolbox.register("attr_feat", random.randint, 0, self.num_releases)
 
-        self.toolbox.register("individual", tools.initRepeat, creator.Individual, self.toolbox.attr_feat, self.num_features)
+        self.toolbox.register("individual", tools.initRepeat, creator.Individual, self.get_initial_release_plan, 1)
         self.toolbox.register("population", tools.initRepeat, list, self.toolbox.individual)
 
         self.toolbox.register("evaluate", self.evalReleasePlan)
         self.toolbox.register("mate", self.cxSet)
         self.toolbox.register("mutate", self.mutSet)
         self.toolbox.register("select", tools.selNSGA2)
+
+    def get_initial_release_plan(self):
+        
 
     def team_capacity_exceeds_sum_effort(self):
         sum_features_effort = 0
@@ -149,6 +152,80 @@ class Evolve:
                     preceded_by, coupled_with)
             self.features[index] = transformed_feature
             self.feature_id_to_index[feature["id"]] = index
+        self.create_coupling_map()
+        self.create_precedence_map()
+        self.initialize_feasible_features()
+        return
+
+    def create_coupling_map(self):
+        coupling_graph = {}
+        for index, feature in self.features.items():
+            if feature[5] == None:
+                continue
+            coupled_with = self.feature_id_to_index[feature[5]]
+            if index not in coupling_graph:
+                coupling_graph[index] = set()
+            if coupled_with not in coupling_graph:
+                coupling_graph[coupled_with] = set()
+            coupling_graph[index].add(coupled_with)
+            coupling_graph[coupled_with].add(index)
+        for node in coupling_graph:
+            coupling_graph[node] = list(coupling_graph[node])
+        
+        self.coupling_map = {}
+        for index in self.features:
+            if ((index in self.coupling_map) or (index not in coupling_graph)):
+                continue
+            open_list = [index]
+            path = []
+            while len(open_list) > 0:
+                current_node = open_list.pop()
+                path.append(current_node)
+                for neighbor in coupling_graph[current_node]:
+                    if ((neighbor in path) or (neighbor in open_list)):
+                        continue
+                    open_list.append(neighbor)
+            for node in path:
+                self.coupling_map[node] = path
+        return
+
+    def create_precedence_map(self):
+        self.precedence_map = {}
+        for index, feature in self.features.items():
+            if feature[4] == None:
+                continue
+            preceded_by = self.feature_id_to_index[feature[4]]
+            if self.is_coupled_with(index, preceded_by):
+               continue
+            if (preceded_by not in self.precedence_map):
+                self.precedence_map[preceded_by] = []
+            self.precedence_map[preceded_by].append(index)
+        return
+
+    def is_coupled_with(self, feature_1, feature_2):
+        if feature_1 not in self.coupling_map:
+            return False
+        return feature_2 in self.coupling_map[feature_1]
+
+    def initialize_feasible_features(self):
+        self.initial_feasible_features = []
+        for index,feature in self.features.items():
+            if feature[4] != None:
+                continue
+            if index not in self.coupling_map:
+                self.initial_feasible_features.append(feature)
+                continue
+            if index != min(self.coupling_map[index]):
+                continue
+            feature_can_be_initialized = True
+            for coupled_feature_index in self.coupling_map[index]:
+                coupled_feature = self.features[coupled_feature_index]
+                coupled_feature_preceded_by = coupled_feature[4]
+                if (coupled_feature_preceded_by != None) and (not self.is_coupled_with(coupled_feature_index, coupled_feature_preceded_by)):
+                    feature_can_be_initialized = False
+                    break
+            if feature_can_be_initialized:
+                self.initial_feasible_features.append(feature)
         return
 
     def evalReleasePlan(self, individual):

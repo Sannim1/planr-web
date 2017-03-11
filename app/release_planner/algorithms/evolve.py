@@ -44,6 +44,8 @@ class Evolve:
     def generate(self):
 
         if self.team_capacity_exceeds_sum_effort():
+            # the team capacity exceeds the sum of the required effort,
+            # hence all of the features can be implemented in the first release
             release_plan = [1] * self.num_features
             release_plans = []
             min_penalty, max_penalty = 0, 0
@@ -58,9 +60,9 @@ class Evolve:
                 "min_penalty": min_penalty,
                 "max_penalty": max_penalty,
                 "min_benefit": min_benefit,
-                "max_benefit": max_benefit
+                "max_benefit": max_benefit,
+                "num_valid_release_plans": 1
             }
-
 
         num_generations = 100
         population_size = 50
@@ -102,7 +104,6 @@ class Evolve:
             "num_valid_release_plans": len(halloffame)
         }
 
-
     def transform_features(self, features):
         self.features = {}
         self.feature_id_to_index = {}
@@ -143,11 +144,11 @@ class Evolve:
                 penalty += (self.min_priority + 1 - self.features[feature][1])*(release)
             else:
                 penalty += (self.min_priority + 1 - self.features[feature][1])*(self.num_releases + 1)
-                
+
             if effort[release] > self.team_capacity :
                 return sys.maxint, 0
 
-            
+
         return penalty, benefit
 
 

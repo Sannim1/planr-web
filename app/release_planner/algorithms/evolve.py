@@ -9,6 +9,7 @@ from deap import tools
 class Evolve:
     def __init__(self, features, num_releases, team_capacity):
         self.transform_features(features)
+        self.features_for_initial_release_plan = []
         self.num_features = len(features)
         self.num_releases = num_releases
         self.team_capacity = team_capacity
@@ -23,7 +24,7 @@ class Evolve:
         self.toolbox = base.Toolbox()
         self.toolbox.register("attr_feat", random.randint, 0, self.num_releases)
 
-        self.toolbox.register("individual", tools.initRepeat, creator.Individual, self.get_initial_release_plan, 1)
+        self.toolbox.register("individual", tools.initRepeat, creator.Individual, self.get_feature_for_initial_release_plan, self.num_features)
         self.toolbox.register("population", tools.initRepeat, list, self.toolbox.individual)
 
         self.toolbox.register("evaluate", self.evalReleasePlan)
@@ -31,8 +32,76 @@ class Evolve:
         self.toolbox.register("mutate", self.mutSet)
         self.toolbox.register("select", tools.selNSGA2)
 
+    def get_feature_for_initial_release_plan(self):
+        if len(self.features_for_initial_release_plan) == 0:
+            self.features_for_initial_release_plan = self.get_initial_release_plan()
+        return self.features_for_initial_release_plan.pop(0)
+
     def get_initial_release_plan(self):
-        
+        implemented_features = []
+        feasible_features = self.initial_feasible_features[:]
+        release_plan = [0] * len(self.features)
+        # initialize remaining effort with team capacity
+        remaining_effort = {}
+        for index in xrange(1, self.num_releases + 1):
+            remaining_effort[index] = self.team_capacity
+
+        for release_number in xrange(1, self.num_releases + 1):
+            while True:
+                if len(feasible_features) == 0:
+                    break
+                random_index = random.randint(0, len(feasible_features) - 1)
+                random_feasible_feature = feasible_features[random_index]
+                combined_effort = self.get_combined_effort(random_feasible_feature)
+                if remaining_effort[release_number] < combined_effort:
+                    break
+                coupled_features = self.get_coupled_features(random_feasible_feature)
+                dependent_features = []
+                for coupled_feature in coupled_features:
+                    release_plan[coupled_feature] = release_number
+                    implemented_features.append(coupled_feature)
+                    dependent_features += self.get_depending_features(coupled_feature)
+                    # print dependent_features
+                for dependent_feature in dependent_features:
+                    if not self.is_feasible_feature(dependent_feature, implemented_features):
+                        continue
+                    dependent_couple = self.get_coupled_features(dependent_feature)
+                    min_dependent_couple = min(dependent_couple)
+                    if min_dependent_couple not in feasible_features:
+                        feasible_features.append(min_dependent_couple)
+                del feasible_features[random_index]
+                remaining_effort[release_number] -= combined_effort
+        print release_plan
+        return release_plan
+
+    def get_combined_effort(self, feature_index):
+        if feature_index not in self.coupling_map:
+            return self.features[feature_index][0]
+        combined_effort = 0
+        for coupled_feature in self.coupling_map[feature_index]:
+            combined_effort += self.features[coupled_feature][0]
+        return combined_effort
+
+    def get_coupled_features(self, feature_index):
+        if feature_index not in self.coupling_map:
+            return [feature_index]
+        return self.coupling_map[feature_index]
+
+    def get_depending_features(self, feature_index):
+        if feature_index not in self.precedence_map:
+            return []
+        return self.precedence_map[feature_index]
+
+    def is_feasible_feature(self, feature_index, implemented_features):
+        coupled_features = self.get_coupled_features(feature_index)
+        for feature in coupled_features:
+            preceded_by = self.features[feature][4]
+            if preceded_by == None:
+                continue
+            preceded_by_index = self.feature_id_to_index[preceded_by]
+            if preceded_by_index not in implemented_features:
+                return False
+        return True
 
     def team_capacity_exceeds_sum_effort(self):
         sum_features_effort = 0
@@ -42,7 +111,6 @@ class Evolve:
         if self.team_capacity >= sum_features_effort:
             return True;
         return False;
-
 
     def custom_algorithm(self, pop, toolbox, mu, CXPB, MUTPB, NGEN, halloffame):
         # Evaluate the entire population
@@ -73,10 +141,7 @@ class Evolve:
             # Insert best individuals in the halloffame
             halloffame.update(pop)
 
-
-
     def generate(self):
-
         if self.team_capacity_exceeds_sum_effort():
             # the team capacity exceeds the sum of the required effort,
             # hence all of the features can be implemented in the first release
@@ -171,7 +236,7 @@ class Evolve:
             coupling_graph[coupled_with].add(index)
         for node in coupling_graph:
             coupling_graph[node] = list(coupling_graph[node])
-        
+
         self.coupling_map = {}
         for index in self.features:
             if ((index in self.coupling_map) or (index not in coupling_graph)):
@@ -210,10 +275,11 @@ class Evolve:
     def initialize_feasible_features(self):
         self.initial_feasible_features = []
         for index,feature in self.features.items():
+            # check feature is not preceded by another feature
             if feature[4] != None:
                 continue
             if index not in self.coupling_map:
-                self.initial_feasible_features.append(feature)
+                self.initial_feasible_features.append(index)
                 continue
             if index != min(self.coupling_map[index]):
                 continue
@@ -225,7 +291,7 @@ class Evolve:
                     feature_can_be_initialized = False
                     break
             if feature_can_be_initialized:
-                self.initial_feasible_features.append(feature)
+                self.initial_feasible_features.append(index)
         return
 
     def evalReleasePlan(self, individual):

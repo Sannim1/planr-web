@@ -61,7 +61,6 @@ class Evolve:
                     release_plan[coupled_feature] = release_number
                     implemented_features.append(coupled_feature)
                     dependent_features += self.get_depending_features(coupled_feature)
-                    # print dependent_features
                 for dependent_feature in dependent_features:
                     if not self.is_feasible_feature(dependent_feature, implemented_features):
                         continue
@@ -71,7 +70,6 @@ class Evolve:
                         feasible_features.append(min_dependent_couple)
                 del feasible_features[random_index]
                 remaining_effort[release_number] -= combined_effort
-        print release_plan
         return release_plan
 
     def get_combined_effort(self, feature_index):
@@ -177,15 +175,15 @@ class Evolve:
         pareto_front.update(halloffame)
 
         release_plans = []
-        min_penalty, max_penalty = 0, 0
-        min_benefit, max_benefit = 0, 0
+        min_penalty, max_penalty = -1, 0
+        min_benefit, max_benefit = -1, 0
         for release_plan in pareto_front:
             penalty, benefit = release_plan.fitness.values
 
-            if penalty < min_penalty: min_penalty = penalty
+            if penalty < min_penalty or min_penalty == -1: min_penalty = penalty
             if penalty > max_penalty: max_penalty = penalty
 
-            if benefit < min_benefit: min_benefit = benefit
+            if benefit < min_benefit or min_benefit == -1: min_benefit = benefit
             if benefit > max_benefit: max_benefit = benefit
 
             release_plans.append({

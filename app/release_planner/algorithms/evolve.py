@@ -165,7 +165,7 @@ class Evolve:
         population_size = 50
         # num_children = 100
         crossover_rate = 0.9
-        mutation_rate = 0.2
+        mutation_rate = 1 / self.num_features
 
         population = self.toolbox.population(n = population_size)
         pareto_front = tools.ParetoFront()
@@ -337,11 +337,11 @@ class Evolve:
 
         rnd1, rnd2 = random.sample(range(0, self.num_features - 1), 2)
 
-        result_1[rnd1] = ind2[rnd1]
-        result_1[rnd2] = ind2[rnd2]
+        result_1[:rnd1] = ind2[:rnd1]
+        result_1[:rnd2] = ind2[:rnd2]
 
-        result_2[rnd1] = ind1[rnd1]
-        result_2[rnd2] = ind1[rnd2]
+        result_2[:rnd1] = ind1[:rnd1]
+        result_2[:rnd2] = ind1[:rnd2]
 
         return result_1, result_2
 
@@ -349,7 +349,10 @@ class Evolve:
 
     def mutSet(self, individual):
 
-        individual[random.randint(0, self.num_features - 1)] = random.randint(0, self.num_releases)
+        rnd1, rnd2 = random.sample(range(0, self.num_features - 1), 2)
+        tmp = individual[rnd1]
+        individual[rnd1] = individual[rnd2]
+        individual[rnd2] = tmp
         return individual,
 
     def map_features_to_releases(self, release_plan):

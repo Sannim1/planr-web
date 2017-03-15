@@ -16,5 +16,10 @@ def create_release_plans():
         raise BadRequest(validator.errors()[0])
 
     planner = Planner()
-    release_plans = planner.request_plans(request.json["features"], request.json["team_capacity"], request.json["number_of_releases"])
-    return jsonify(release_plans), 201
+    release_plans, metadata = planner.request_plans(request.json["features"], request.json["team_capacity"], request.json["number_of_releases"])
+
+    response = {}
+    response["data"] = release_plans
+    response["metadata"] = metadata
+
+    return jsonify(response), 201

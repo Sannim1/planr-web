@@ -7,14 +7,11 @@ from deap import tools
 
 class Evolve:
 
-
-
-""" Initialization Operations """
-
+    """ Initialization Operations """
 
     def __init__(self, features, num_releases, team_capacity):
         """Constructor of the GA
-            
+
             featuers : VSTS's work item's info
             num_releases : Number of releases specified by the user
             team_capacity : Team capacity in hours as specified by the user
@@ -27,12 +24,11 @@ class Evolve:
         self.min_priority = 4   # Currently on VSTS
         self.initialize_algorithm()
 
-
     def transform_features(self, features):
         """Gets VSTS work items to create feature items for the algorithms,
            creates feature relation maps,
            initialize a list of initial feasible features
-           
+
            features : The work items, as given by the VSTS
         """
         self.features = {}
@@ -53,8 +49,6 @@ class Evolve:
         self.initialize_feasible_features()
         return
 
-
- 
     def create_coupling_map(self):
         """Creates a map that shows the coupled features"""
 
@@ -73,7 +67,7 @@ class Evolve:
             coupling_graph[coupled_with].add(index)
         for node in coupling_graph:
             coupling_graph[node] = list(coupling_graph[node])
-        
+
         # Create a coupling map (node information), based on the generated graph
         self.coupling_map = {}
         for index in self.features:
@@ -198,13 +192,11 @@ class Evolve:
                 remaining_effort[release_number] -= combined_effort  # Update remaining effort
         return release_plan
 
-
-""" GA Operations """
- 
+    """ Genetic Algorithm Operations """
 
     def evalReleasePlan(self, individual):
         """Evaluates how fit a release plan is
-            
+
             individual : release plan to be evaluated
         """
         effort = [0]*(self.num_releases+1)
@@ -233,9 +225,8 @@ class Evolve:
                 return sys.maxint, 0    # then the release plan is invalid
         return penalty, benefit
 
-
     def cxSet(self, ind1, ind2):
-        """Crossovers release plans to generate 4 offsprings that share their characteristics 
+        """Crossovers release plans to generate 4 offsprings that share their characteristics
 
             ind1, ind2 : parent release plans to be crossovered
         """
@@ -250,9 +241,8 @@ class Evolve:
         result_2[:rnd2] = ind1[:rnd2]
         return result_1, result_2
 
-
     def mutSet(self, individual):
-        """Mutates a release plan to introduce variance in solutions 
+        """Mutates a release plan to introduce variance in solutions
 
             individual : release plan to be mutated
         """
@@ -262,14 +252,13 @@ class Evolve:
         tmp = individual[rnd1]
         individual[rnd1] = individual[rnd2]
         individual[rnd2] = tmp
-        return individual,
-
+        return individual
 
     def custom_algorithm(self, pop, toolbox, mu, CXPB, MUTPB, NGEN, halloffame):
         """Implementation of the core of the Genetic Algorithm
 
-            pop : the initial population 
-            toolbox : an abstract container consisting of specified evolutionary tools 
+            pop : the initial population
+            toolbox : an abstract container consisting of specified evolutionary tools
             mu : population size
             CXPB : crossover rate
             MUTPB : mutation rate
@@ -293,15 +282,13 @@ class Evolve:
             pop[:] = toolbox.select(selected_population + offspring, mu)    # Population is replaced by selecting the fittest individual from previous population and offsprings
             halloffame.update(pop)  # Update halloffame with best offsprings
 
-
-""" Run-time Operation """
-
+    """ Run-time Operation """
 
     def generate(self):
         """This method runs the GA to return sub-optimal release plans"""
 
         # if team capacity exceeds the sum of the required effort,
-        # hence all of the features can be implemented in the first release
+        # it implies all of the features can be implemented in the first release
         if self.team_capacity_exceeds_sum_effort():
             release_plan = [1] * self.num_features
             release_plans = []
@@ -345,6 +332,7 @@ class Evolve:
                 "benefit": benefit,
                 "releases": self.map_features_to_releases(release_plan)
             })
+
         # Return release plans with metadata
         return {
             "release_plans": release_plans,
@@ -355,9 +343,7 @@ class Evolve:
             "num_valid_release_plans": len(halloffame)
         }
 
-
-""" Supporting Operations """    
-
+    """ Helper functions """
 
     def get_combined_effort(self, feature_index):
         """Returns the combined effort of all the coupled feature to this feature
@@ -371,7 +357,6 @@ class Evolve:
             combined_effort += self.features[coupled_feature][0]
         return combined_effort
 
-         
     def get_coupled_features(self, feature_index):
         """Returns the list of coupled feature to this feature
 
@@ -381,7 +366,6 @@ class Evolve:
             return [feature_index]
         return self.coupling_map[feature_index]
 
-
     def get_depending_features(self, feature_index):
         """Returns the list of features that are dependent to this feature
 
@@ -390,7 +374,6 @@ class Evolve:
         if feature_index not in self.precedence_map:
             return []
         return self.precedence_map[feature_index]
-
 
     def is_feasible_feature(self, feature_index, implemented_features):
         """Checks if feature is feasible based on its constraints
@@ -408,7 +391,6 @@ class Evolve:
                 return False
         return True
 
-
     def team_capacity_exceeds_sum_effort(self):
         """Checks if team capacity is greater equal to the sum effort of all features"""
 
@@ -416,9 +398,8 @@ class Evolve:
         for index in self.features:
             sum_features_effort += self.features[index][0]  # sum_features_effort += feature["effort"]
         if self.team_capacity >= sum_features_effort:
-            return True;
-        return False;
-
+            return True
+        return False
 
     def is_coupled_with(self, feature_1, feature_2):
         """Checks if features are coupled
@@ -429,9 +410,8 @@ class Evolve:
             return False
         return feature_2 in self.coupling_map[feature_1]
 
-
     def map_features_to_releases(self, release_plan):
-        """Transforms single release plan into list of releases containing ids of the features 
+        """Transforms single release plan into list of releases containing ids of the features
 
             release_plan : a release plan representation as used during the GA processing
         """

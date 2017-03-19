@@ -5,6 +5,10 @@ class ReleasePlanRequestValidator:
         return
 
     def validate(self, release_plan_request):
+        """
+            Validate a JSON release plan request by checking the existence of required fields and
+            that fields have an appropriate data type.
+        """
         for required_field in self._required_fields:
             if required_field not in release_plan_request:
                 error_message = str(required_field) + " is a required field"
@@ -26,6 +30,7 @@ class ReleasePlanRequestValidator:
             self.add_error("The number of features must be greater than or equal to the number of releases")
             return False
 
+        # instantitate a validator to handle the specifics of validating a Feature object
         feature_validator = FeatureValidator()
         feature_ids = []
         # validate required feature fields
@@ -60,6 +65,10 @@ class FeatureValidator:
         return
 
     def validate(self, feature):
+        """
+            Validate a feature object by checking the existence of required fields and
+            that fields have an appropriate data type.
+        """
         if not isinstance(feature, dict):
             self.add_error("A feature must be represented as a JSON object")
             return False

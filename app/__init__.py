@@ -4,11 +4,12 @@ from flask_cors import CORS, cross_origin
 from werkzeug.exceptions import BadRequest
 
 # Define the WSGI application object
-app = Flask(__name__, instance_relative_config = True)
+app = Flask(__name__, instance_relative_config=True)
 CORS(app)
 
 # Configurations
 app.config.from_object('config')
+
 
 @app.before_request
 def before_request():
@@ -18,9 +19,12 @@ def before_request():
         raise BadRequest("The Content-Type of the request body should be JSON")
 
 # HTTP error handling
+
+
 @app.errorhandler(404)
 def not_found(error):
     return make_response(jsonify({'error': 'Not found'}), 404)
+
 
 @app.errorhandler(BadRequest)
 def handle_bad_request(error):

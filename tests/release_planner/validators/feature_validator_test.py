@@ -1,7 +1,9 @@
 from app.release_planner.validator import FeatureValidator
 import unittest
 
+
 class FeatureValidatorTest(unittest.TestCase):
+
     @classmethod
     def setUpClass(cls):
         pass
@@ -31,13 +33,15 @@ class FeatureValidatorTest(unittest.TestCase):
         feature = []
 
         self.assertFalse(self.validator.validate(feature))
-        self.assertTrue("A feature must be represented as a JSON object" in self.validator.errors())
+        self.assertTrue(
+            "A feature must be represented as a JSON object" in self.validator.errors())
 
     def test_validator_returns_false_for_an_empty_feature_object(self):
         feature = {}
 
         self.assertFalse(self.validator.validate(feature))
-        self.assertTrue("A feature object cannot be empty" in self.validator.errors())
+        self.assertTrue(
+            "A feature object cannot be empty" in self.validator.errors())
 
     def test_validator_returns_false_if_the_id_field_is_missing(self):
         feature = {
@@ -47,7 +51,8 @@ class FeatureValidatorTest(unittest.TestCase):
         }
 
         self.assertFalse(self.validator.validate(feature))
-        self.assertTrue("ID is a required field of a feature" in self.validator.errors())
+        self.assertTrue(
+            "ID is a required field of a feature" in self.validator.errors())
 
     def test_validator_returns_false_if_the_priority_field_is_missing(self):
         feature = {
@@ -57,7 +62,8 @@ class FeatureValidatorTest(unittest.TestCase):
         }
 
         self.assertFalse(self.validator.validate(feature))
-        self.assertTrue("priority is a required field of feature:1" in self.validator.errors())
+        self.assertTrue(
+            "priority is a required field of feature:1" in self.validator.errors())
 
     def test_validator_returns_false_if_the_business_value_field_is_missing(self):
         feature = {
@@ -67,7 +73,8 @@ class FeatureValidatorTest(unittest.TestCase):
         }
 
         self.assertFalse(self.validator.validate(feature))
-        self.assertTrue("business_value is a required field of feature:1" in self.validator.errors())
+        self.assertTrue(
+            "business_value is a required field of feature:1" in self.validator.errors())
 
     def test_validator_returns_false_if_the_effort_field_is_missing(self):
         feature = {
@@ -77,7 +84,8 @@ class FeatureValidatorTest(unittest.TestCase):
         }
 
         self.assertFalse(self.validator.validate(feature))
-        self.assertTrue("effort is a required field of feature:1" in self.validator.errors())
+        self.assertTrue(
+            "effort is a required field of feature:1" in self.validator.errors())
 
     def test_validator_returns_false_if_the_id_field_is_not_an_integer(self):
         feature = {
@@ -88,7 +96,8 @@ class FeatureValidatorTest(unittest.TestCase):
         }
 
         self.assertFalse(self.validator.validate(feature))
-        self.assertTrue("The ID field of a feature must be an integer" in self.validator.errors())
+        self.assertTrue(
+            "The ID field of a feature must be an integer" in self.validator.errors())
 
     def test_validator_returns_false_if_the_business_value_field_is_not_an_integer(self):
         feature = {
@@ -99,7 +108,8 @@ class FeatureValidatorTest(unittest.TestCase):
         }
 
         self.assertFalse(self.validator.validate(feature))
-        self.assertTrue("The business_value field of feature:1 must be an integer" in self.validator.errors())
+        self.assertTrue(
+            "The business_value field of feature:1 must be an integer" in self.validator.errors())
 
     def test_validator_returns_false_if_the_effort_field_is_not_an_integer(self):
         feature = {
@@ -110,7 +120,8 @@ class FeatureValidatorTest(unittest.TestCase):
         }
 
         self.assertFalse(self.validator.validate(feature))
-        self.assertTrue("The effort field of feature:1 must be an integer" in self.validator.errors())
+        self.assertTrue(
+            "The effort field of feature:1 must be an integer" in self.validator.errors())
 
     def test_validator_returns_false_if_the_priority_field_is_not_an_integer(self):
         feature = {
@@ -121,4 +132,5 @@ class FeatureValidatorTest(unittest.TestCase):
         }
 
         self.assertFalse(self.validator.validate(feature))
-        self.assertTrue("The priority field of feature:1 must be an integer" in self.validator.errors())
+        self.assertTrue(
+            "The priority field of feature:1 must be an integer" in self.validator.errors())

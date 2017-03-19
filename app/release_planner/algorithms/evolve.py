@@ -5,6 +5,7 @@ from deap import base
 from deap import creator
 from deap import tools
 
+
 class Evolve:
 
     """ Initialization Operations """
@@ -40,8 +41,8 @@ class Evolve:
             if "coupled_with" in feature:
                 coupled_with = feature["coupled_with"]
             transformed_feature = (feature["effort"], feature["priority"],
-                    feature["business_value"], feature["id"],
-                    preceded_by, coupled_with)
+                                   feature["business_value"], feature["id"],
+                                   preceded_by, coupled_with)
             self.features[index] = transformed_feature
             self.feature_id_to_index[feature["id"]] = index
         self.create_coupling_map()
@@ -68,7 +69,8 @@ class Evolve:
         for node in coupling_graph:
             coupling_graph[node] = list(coupling_graph[node])
 
-        # Create a coupling map (node information), based on the generated graph
+        # Create a coupling map (node information), based on the generated
+        # graph
         self.coupling_map = {}
         for index in self.features:
             if ((index in self.coupling_map) or (index not in coupling_graph)):
@@ -86,7 +88,6 @@ class Evolve:
                 self.coupling_map[node] = path
         return
 
-
     def create_precedence_map(self):
         """Creates a map that shows the dependent features of a feature"""
 
@@ -96,31 +97,36 @@ class Evolve:
                 continue
             preceded_by = self.feature_id_to_index[feature[4]]
             if self.is_coupled_with(index, preceded_by):
-               continue
+                continue
             if (preceded_by not in self.precedence_map):
                 self.precedence_map[preceded_by] = []
             self.precedence_map[preceded_by].append(index)
         return
 
-
     def initialize_feasible_features(self):
         """Creates the list of initial feasible features"""
 
         self.initial_feasible_features = []
-        for index,feature in self.features.items():
-            if feature[4] != None:  # if preceded_by != None then it's not feasible
+        for index, feature in self.features.items():
+            # if preceded_by != None then it's not feasible
+            if feature[4] != None:
                 continue
-            if index not in self.coupling_map:  # if preceded_by == None and it's not coupled with other features then it's feasible
+            # if preceded_by == None and it's not coupled with other features
+            # then it's feasible
+            if index not in self.coupling_map:
                 self.initial_feasible_features.append(index)
                 continue
-            if index != min(self.coupling_map[index]):  # if it's not the first feature in its coupling group then we have already covered it
+            # if it's not the first feature in its coupling group then we have
+            # already covered it
+            if index != min(self.coupling_map[index]):
                 continue
             feature_can_be_initialized = True
 
             # Check if all the coupled features are not preceded by others
             for coupled_feature_index in self.coupling_map[index]:
                 coupled_feature = self.features[coupled_feature_index]
-                coupled_feature_preceded_by = coupled_feature[4]    # coupled_feature_preceded_by = coupled_feature["preceded_by"]
+                # coupled_feature_preceded_by = coupled_feature["preceded_by"]
+                coupled_feature_preceded_by = coupled_feature[4]
                 if (coupled_feature_preceded_by != None) and (not self.is_coupled_with(coupled_feature_index, coupled_feature_preceded_by)):
                     feature_can_be_initialized = False
                     break
@@ -128,20 +134,20 @@ class Evolve:
                 self.initial_feasible_features.append(index)
         return
 
-
     def initialize_algorithm(self):
         """Specifies the containers of individual and population, registers evolutionary tools """
 
         creator.create("Fitness", base.Fitness, weights=(-1.0, 1.0))
         creator.create("Individual", list, fitness=creator.Fitness)
         self.toolbox = base.Toolbox()
-        self.toolbox.register("individual", tools.initRepeat, creator.Individual, self.get_feature_for_initial_release_plan, self.num_features)
-        self.toolbox.register("population", tools.initRepeat, list, self.toolbox.individual)
+        self.toolbox.register("individual", tools.initRepeat, creator.Individual,
+                              self.get_feature_for_initial_release_plan, self.num_features)
+        self.toolbox.register(
+            "population", tools.initRepeat, list, self.toolbox.individual)
         self.toolbox.register("evaluate", self.evalReleasePlan)
         self.toolbox.register("mate", self.cxSet)
         self.toolbox.register("mutate", self.mutSet)
         self.toolbox.register("select", tools.selNSGA2)
-
 
     def get_feature_for_initial_release_plan(self):
         """Pops the first feature from a randomly generated release plan"""
@@ -149,7 +155,6 @@ class Evolve:
         if len(self.features_for_initial_release_plan) == 0:
             self.features_for_initial_release_plan = self.get_initial_release_plan()
         return self.features_for_initial_release_plan.pop(0)
-
 
     def get_initial_release_plan(self):
         """Randomly generates a valid release plan"""
@@ -161,35 +166,46 @@ class Evolve:
         # Initialize effort in each release = 0
         for index in xrange(1, self.num_releases + 1):
             remaining_effort[index] = self.team_capacity
-        for release_number in xrange(1, self.num_releases + 1):  # for every release
+        # for every release
+        for release_number in xrange(1, self.num_releases + 1):
             while True:
-                if len(feasible_features) == 0:  # if there is no available feasible feature then terminate
+                # if there is no available feasible feature then terminate
+                if len(feasible_features) == 0:
                     break
                 # Select a random features from the feasible feature list
                 random_index = random.randint(0, len(feasible_features) - 1)
                 random_feasible_feature = feasible_features[random_index]
-                # Get the effort of the feature and its coupled one if they exist
-                combined_effort = self.get_combined_effort(random_feasible_feature)
-                if remaining_effort[release_number] < combined_effort:  # if the effort of the feature(or features) is greater than the remaining effort of the release
+                # Get the effort of the feature and its coupled one if they
+                # exist
+                combined_effort = self.get_combined_effort(
+                    random_feasible_feature)
+                # if the effort of the feature(or features) is greater than the
+                # remaining effort of the release
+                if remaining_effort[release_number] < combined_effort:
                     break   # then break and move to the next release
-                coupled_features = self.get_coupled_features(random_feasible_feature)
+                coupled_features = self.get_coupled_features(
+                    random_feasible_feature)
                 dependent_features = []
                 # Assign feature(or features) to release
                 # Update implemented features list
                 for coupled_feature in coupled_features:
                     release_plan[coupled_feature] = release_number
                     implemented_features.append(coupled_feature)
-                    dependent_features += self.get_depending_features(coupled_feature)
-                # Check if depedent features are feasible and add them to the list of feasible features
+                    dependent_features += self.get_depending_features(
+                        coupled_feature)
+                # Check if depedent features are feasible and add them to the
+                # list of feasible features
                 for dependent_feature in dependent_features:
                     if not self.is_feasible_feature(dependent_feature, implemented_features):
                         continue
-                    dependent_couple = self.get_coupled_features(dependent_feature)
+                    dependent_couple = self.get_coupled_features(
+                        dependent_feature)
                     min_dependent_couple = min(dependent_couple)
                     if min_dependent_couple not in feasible_features:
                         feasible_features.append(min_dependent_couple)
                 del feasible_features[random_index]
-                remaining_effort[release_number] -= combined_effort  # Update remaining effort
+                # Update remaining effort
+                remaining_effort[release_number] -= combined_effort
         return release_plan
 
     """ Genetic Algorithm Operations """
@@ -205,23 +221,37 @@ class Evolve:
         for feature, release in enumerate(individual):
             # Check if feature is preceded by 'other' feature
             if self.features[feature][4] != None and self.features[feature][4] != self.features[feature][3]:
-                precedenceIndex = self.feature_id_to_index[self.features[feature][4]]
+                precedenceIndex = self.feature_id_to_index[
+                    self.features[feature][4]]
                 precedenceRelease = individual[precedenceIndex]
-                if release < precedenceRelease or (release > precedenceRelease and precedenceRelease == 0):  # if the implementation of the preceded feature(parent) is after the dependent(child)
+                # if the implementation of the preceded feature(parent) is
+                # after the dependent(child)
+                if release < precedenceRelease or (release > precedenceRelease and precedenceRelease == 0):
                     return sys.maxint, 0    # then the release plan is invalid
             # Check if feature is coupled with 'other' feature
             if self.features[feature][5] != None and self.features[feature][5] != self.features[feature][3]:
-                couplingIndex = self.feature_id_to_index[self.features[feature][5]]
+                couplingIndex = self.feature_id_to_index[
+                    self.features[feature][5]]
                 couplingRelease = individual[couplingIndex]
-                if release != couplingRelease:  # if the implementations of the coupled features are not the same
+                # if the implementations of the coupled features are not the
+                # same
+                if release != couplingRelease:
                     return sys.maxint, 0    # then the release plan is invalid
-            if release !=0:  # if feature is implemented, update benefit, effort and penalty of the release
-                benefit += self.features[feature][2]*(self.num_releases - release + 1)
+            # if feature is implemented, update benefit, effort and penalty of
+            # the release
+            if release != 0:
+                benefit += self.features[feature][2] * \
+                    (self.num_releases - release + 1)
                 effort[release] += self.features[feature][0]
-                penalty += (self.min_priority + 1 - self.features[feature][1])*(release)
-            else:   # if feature is not implemented, update penalty of the release
-                penalty += (self.min_priority + 1 - self.features[feature][1])*(self.num_releases + 1)
-            if effort[release] > self.team_capacity :   # if the sum effort of the features implemented in a release is greater than team capacity
+                penalty += (self.min_priority + 1 -
+                            self.features[feature][1])*(release)
+            # if feature is not implemented, update penalty of the release
+            else:
+                penalty += (self.min_priority + 1 -
+                            self.features[feature][1])*(self.num_releases + 1)
+            # if the sum effort of the features implemented in a release is
+            # greater than team capacity
+            if effort[release] > self.team_capacity:
                 return sys.maxint, 0    # then the release plan is invalid
         return penalty, benefit
 
@@ -247,7 +277,8 @@ class Evolve:
             individual : release plan to be mutated
         """
 
-        # Randomly switch the implementation's release of two features with each other
+        # Randomly switch the implementation's release of two features with
+        # each other
         rnd1, rnd2 = random.sample(range(0, self.num_features - 1), 2)
         tmp = individual[rnd1]
         individual[rnd1] = individual[rnd2]
@@ -272,14 +303,21 @@ class Evolve:
             ind.fitness.values = fit
         halloffame.update(pop)  # Register best individuals in halloffame
         for g in range(NGEN):
-            selected_population = toolbox.select(pop, len(pop))  # Select the next generation individuals
-            selected_population = map(toolbox.clone, selected_population)   # Clone the selected individuals
-            offspring = algorithms.varAnd(selected_population, toolbox, CXPB, MUTPB)    # Apply crossover and mutation
-            invalid_ind = [ind for ind in offspring if not ind.fitness.valid]   # Evaluate the newly generated offsprings
+            # Select the next generation individuals
+            selected_population = toolbox.select(pop, len(pop))
+            # Clone the selected individuals
+            selected_population = map(toolbox.clone, selected_population)
+            # Apply crossover and mutation
+            offspring = algorithms.varAnd(
+                selected_population, toolbox, CXPB, MUTPB)
+            # Evaluate the newly generated offsprings
+            invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
             fitnesses = map(toolbox.evaluate, invalid_ind)
             for ind, fit in zip(invalid_ind, fitnesses):
                 ind.fitness.values = fit
-            pop[:] = toolbox.select(selected_population + offspring, mu)    # Population is replaced by selecting the fittest individual from previous population and offsprings
+            # Population is replaced by selecting the fittest individual from
+            # previous population and offsprings
+            pop[:] = toolbox.select(selected_population + offspring, mu)
             halloffame.update(pop)  # Update halloffame with best offsprings
 
     """ Run-time Operation """
@@ -288,7 +326,8 @@ class Evolve:
         """This method runs the GA to return sub-optimal release plans"""
 
         # if team capacity exceeds the sum of the required effort,
-        # it implies all of the features can be implemented in the first release
+        # it implies all of the features can be implemented in the first
+        # release
         if self.team_capacity_exceeds_sum_effort():
             release_plan = [1] * self.num_features
             release_plans = []
@@ -312,21 +351,28 @@ class Evolve:
         population_size = 50
         crossover_rate = 0.9
         mutation_rate = 1 / self.num_features
-        population = self.toolbox.population(n = population_size)   # Initialize population of first generation
+        # Initialize population of first generation
+        population = self.toolbox.population(n=population_size)
         pareto_front = tools.ParetoFront()
         halloffame = tools.HallOfFame(num_generations*population_size)
         # Run the GA
-        self.custom_algorithm(population, self.toolbox, population_size, crossover_rate, mutation_rate, num_generations, halloffame)
-        pareto_front.update(halloffame)  # From the best individuals, keep the non-dominated ones
+        self.custom_algorithm(population, self.toolbox, population_size,
+                              crossover_rate, mutation_rate, num_generations, halloffame)
+        # From the best individuals, keep the non-dominated ones
+        pareto_front.update(halloffame)
         release_plans = []
         min_penalty, max_penalty = -1, 0
         min_benefit, max_benefit = -1, 0
         for release_plan in pareto_front:
             penalty, benefit = release_plan.fitness.values
-            if penalty < min_penalty or min_penalty == -1: min_penalty = penalty
-            if penalty > max_penalty: max_penalty = penalty
-            if benefit < min_benefit or min_benefit == -1: min_benefit = benefit
-            if benefit > max_benefit: max_benefit = benefit
+            if penalty < min_penalty or min_penalty == -1:
+                min_penalty = penalty
+            if penalty > max_penalty:
+                max_penalty = penalty
+            if benefit < min_benefit or min_benefit == -1:
+                min_benefit = benefit
+            if benefit > max_benefit:
+                max_benefit = benefit
             release_plans.append({
                 "penalty": penalty,
                 "benefit": benefit,
@@ -383,7 +429,8 @@ class Evolve:
         """
         coupled_features = self.get_coupled_features(feature_index)
         for feature in coupled_features:
-            preceded_by = self.features[feature][4]  # preceded_by = feature["preceded_by"]
+            # preceded_by = feature["preceded_by"]
+            preceded_by = self.features[feature][4]
             if preceded_by == None:
                 continue
             preceded_by_index = self.feature_id_to_index[preceded_by]
@@ -396,7 +443,8 @@ class Evolve:
 
         sum_features_effort = 0
         for index in self.features:
-            sum_features_effort += self.features[index][0]  # sum_features_effort += feature["effort"]
+            # sum_features_effort += feature["effort"]
+            sum_features_effort += self.features[index][0]
         if self.team_capacity >= sum_features_effort:
             return True
         return False

@@ -1,6 +1,8 @@
 from algorithms.evolve import Evolve
 
+
 class Planner:
+
     def __init__(self):
         return
 
@@ -55,7 +57,8 @@ class Planner:
         """
         scaled_value = 1
         if max_penalty != min_penalty:
-            scaled_value = (max_penalty - penalty) / ((max_penalty - min_penalty) * 1.0)
+            scaled_value = (max_penalty - penalty) / \
+                ((max_penalty - min_penalty) * 1.0)
         return scaled_value * 100.
 
     def scale_benefit(self, benefit, min_benefit, max_benefit):
@@ -65,7 +68,8 @@ class Planner:
         """
         scaled_value = 1
         if max_benefit != min_benefit:
-            scaled_value = (benefit - min_benefit) / ((max_benefit - min_benefit) * 1.0)
+            scaled_value = (benefit - min_benefit) / \
+                ((max_benefit - min_benefit) * 1.0)
         return scaled_value * 100.
 
     def transform_releases(self, generated_releases):

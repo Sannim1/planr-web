@@ -1,10 +1,16 @@
 class ReleasePlanRequestValidator:
+
     def __init__(self):
         self._errors = []
-        self._required_fields = ["team_capacity", "number_of_releases", "features"]
+        self._required_fields = [
+            "team_capacity", "number_of_releases", "features"]
         return
 
     def validate(self, release_plan_request):
+        """
+            Validate a JSON release plan request by checking the existence of required fields and
+            that fields have an appropriate data type.
+        """
         for required_field in self._required_fields:
             if required_field not in release_plan_request:
                 error_message = str(required_field) + " is a required field"
@@ -23,9 +29,12 @@ class ReleasePlanRequestValidator:
             self.add_error("The number of releases must be between 1 and 3")
             return False
         if len(release_plan_request['features']) < release_plan_request['number_of_releases']:
-            self.add_error("The number of features must be greater than or equal to the number of releases")
+            self.add_error(
+                "The number of features must be greater than or equal to the number of releases")
             return False
 
+        # instantitate a validator to handle the specifics of validating a
+        # Feature object
         feature_validator = FeatureValidator()
         feature_ids = []
         # validate required feature fields
@@ -53,13 +62,19 @@ class ReleasePlanRequestValidator:
     def errors(self):
         return self._errors
 
+
 class FeatureValidator:
+
     def __init__(self):
         self._errors = []
         self._required_fields = ["business_value", "effort", "priority"]
         return
 
     def validate(self, feature):
+        """
+            Validate a feature object by checking the existence of required fields and
+            that fields have an appropriate data type.
+        """
         if not isinstance(feature, dict):
             self.add_error("A feature must be represented as a JSON object")
             return False
@@ -74,17 +89,21 @@ class FeatureValidator:
             return False
         for required_field in self._required_fields:
             if required_field not in feature:
-                error_message = str(required_field) + " is a required field of feature:" + str(feature['id'])
+                error_message = str(
+                    required_field) + " is a required field of feature:" + str(feature['id'])
                 self.add_error(error_message)
                 return False
         if not isinstance(feature["business_value"], int):
-            self.add_error("The business_value field of feature:" + str(feature['id']) + " must be an integer")
+            self.add_error(
+                "The business_value field of feature:" + str(feature['id']) + " must be an integer")
             return False
         if not isinstance(feature["effort"], int):
-            self.add_error("The effort field of feature:" + str(feature['id']) + " must be an integer")
+            self.add_error(
+                "The effort field of feature:" + str(feature['id']) + " must be an integer")
             return False
         if not isinstance(feature["priority"], int):
-            self.add_error("The priority field of feature:" + str(feature['id']) + " must be an integer")
+            self.add_error(
+                "The priority field of feature:" + str(feature['id']) + " must be an integer")
             return False
 
         return True
@@ -93,10 +112,12 @@ class FeatureValidator:
         if "preceded_by" not in feature:
             return True
         if not isinstance(feature["preceded_by"], int):
-            self.add_error("The preceded_by field of feature:{0} must be an integer".format(feature["id"]))
+            self.add_error(
+                "The preceded_by field of feature:{0} must be an integer".format(feature["id"]))
             return False
         if feature["preceded_by"] not in feature_ids:
-            self.add_error("Feature:{0} can only be preceded by a feature in the same release plan request".format(feature["id"]))
+            self.add_error(
+                "Feature:{0} can only be preceded by a feature in the same release plan request".format(feature["id"]))
             return False
 
         return True
@@ -105,10 +126,12 @@ class FeatureValidator:
         if "coupled_with" not in feature:
             return True
         if not isinstance(feature["coupled_with"], int):
-            self.add_error("The coupled_with field of feature:{0} must be an integer".format(feature["id"]))
+            self.add_error(
+                "The coupled_with field of feature:{0} must be an integer".format(feature["id"]))
             return False
         if feature["coupled_with"] not in feature_ids:
-            self.add_error("Feature:{0} can only be coupled with a feature in the same release plan request".format(feature["id"]))
+            self.add_error(
+                "Feature:{0} can only be coupled with a feature in the same release plan request".format(feature["id"]))
             return False
 
         return True

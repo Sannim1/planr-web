@@ -1,7 +1,9 @@
 from app.release_planner.validator import ReleasePlanRequestValidator
 import unittest
 
+
 class ReleasePlanRequestValidatorTest(unittest.TestCase):
+
     @classmethod
     def setUpClass(cls):
         pass
@@ -59,49 +61,56 @@ class ReleasePlanRequestValidatorTest(unittest.TestCase):
         del release_plan_request["features"]
 
         self.assertFalse(self.validator.validate(release_plan_request))
-        self.assertTrue("features is a required field" in self.validator.errors())
+        self.assertTrue(
+            "features is a required field" in self.validator.errors())
 
     def test_validator_returns_false_if_team_capacity_is_not_specified(self):
         release_plan_request = self.make_release_plan_request()
         del release_plan_request["team_capacity"]
 
         self.assertFalse(self.validator.validate(release_plan_request))
-        self.assertTrue("team_capacity is a required field" in self.validator.errors())
+        self.assertTrue(
+            "team_capacity is a required field" in self.validator.errors())
 
     def test_validator_returns_false_if_number_of_releases_is_not_specified(self):
         release_plan_request = self.make_release_plan_request()
         del release_plan_request["number_of_releases"]
 
         self.assertFalse(self.validator.validate(release_plan_request))
-        self.assertTrue("number_of_releases is a required field" in self.validator.errors())
+        self.assertTrue(
+            "number_of_releases is a required field" in self.validator.errors())
 
     def test_validator_returns_false_if_team_capacity_is_not_an_integer(self):
         release_plan_request = self.make_release_plan_request()
         release_plan_request["team_capacity"] = "notaninteger"
 
         self.assertFalse(self.validator.validate(release_plan_request))
-        self.assertTrue("The team_capacity field must be an integer" in self.validator.errors())
+        self.assertTrue(
+            "The team_capacity field must be an integer" in self.validator.errors())
 
     def test_validator_returns_false_if_number_of_releases_is_not_an_integer(self):
         release_plan_request = self.make_release_plan_request()
         release_plan_request["number_of_releases"] = "notaninteger"
 
         self.assertFalse(self.validator.validate(release_plan_request))
-        self.assertTrue("The number_of_releases field must be an integer" in self.validator.errors())
+        self.assertTrue(
+            "The number_of_releases field must be an integer" in self.validator.errors())
 
     def test_validator_returns_false_if_features_are_not_represented_as_a_list(self):
         release_plan_request = self.make_release_plan_request()
         release_plan_request["features"] = {}
 
         self.assertFalse(self.validator.validate(release_plan_request))
-        self.assertTrue("The features field must be an array" in self.validator.errors())
+        self.assertTrue(
+            "The features field must be an array" in self.validator.errors())
 
     def test_validator_returns_false_if_number_of_releases_is_not_between_1_and_3(self):
         release_plan_request = self.make_release_plan_request()
         release_plan_request["number_of_releases"] = 10
 
         self.assertFalse(self.validator.validate(release_plan_request))
-        self.assertTrue("The number of releases must be between 1 and 3" in self.validator.errors())
+        self.assertTrue(
+            "The number of releases must be between 1 and 3" in self.validator.errors())
 
     def test_validator_returns_false_if_number_of_features_less_than_number_of_releases(self):
         release_plan_request = self.make_release_plan_request()
@@ -110,11 +119,11 @@ class ReleasePlanRequestValidatorTest(unittest.TestCase):
         release_plan_request["number_of_releases"] = 3
 
         self.assertFalse(self.validator.validate(release_plan_request))
-        self.assertTrue("The number of features must be greater than or equal to the number of releases" in self.validator.errors())
+        self.assertTrue(
+            "The number of features must be greater than or equal to the number of releases" in self.validator.errors())
 
     def test_validator_returns_false_if_any_of_the_features_is_invalid(self):
         release_plan_request = self.make_release_plan_request()
         release_plan_request["features"][0] = {}
 
         self.assertFalse(self.validator.validate(release_plan_request))
-

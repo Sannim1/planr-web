@@ -1,5 +1,7 @@
 from app import app
-import unittest, json
+import unittest
+import json
+
 
 class ReleasePlannerRouteTests(unittest.TestCase):
 
@@ -25,7 +27,8 @@ class ReleasePlannerRouteTests(unittest.TestCase):
         result = self.app.get("release_plans/")
 
         self.assertEquals(result.status_code, 200)
-        self.assertEquals(result.headers.get("Content-Type"), "application/json")
+        self.assertEquals(
+            result.headers.get("Content-Type"), "application/json")
 
     def test_release_plan_requests_are_accepted(self):
         release_plan_request = json.dumps({
@@ -48,12 +51,13 @@ class ReleasePlannerRouteTests(unittest.TestCase):
         })
 
         result = self.app.post("release_plans/",
-            data = release_plan_request,
-            content_type = "application/json"
-        )
+                               data=release_plan_request,
+                               content_type="application/json"
+                               )
 
         self.assertEquals(result.status_code, 201)
-        self.assertEquals(result.headers.get("Content-Type"), "application/json")
+        self.assertEquals(
+            result.headers.get("Content-Type"), "application/json")
 
         response_body = json.loads(result.data)
 
@@ -63,10 +67,12 @@ class ReleasePlannerRouteTests(unittest.TestCase):
         release_plan_one = response_body["data"][0]
 
         self.assertTrue("tradeoff" in release_plan_one)
-        self.assertTrue("priority" in  release_plan_one["tradeoff"])
-        self.assertTrue("business_value" in  release_plan_one["tradeoff"])
-        self.assertTrue(isinstance(release_plan_one["tradeoff"]["priority"], float))
-        self.assertTrue(isinstance(release_plan_one["tradeoff"]["business_value"], float))
+        self.assertTrue("priority" in release_plan_one["tradeoff"])
+        self.assertTrue("business_value" in release_plan_one["tradeoff"])
+        self.assertTrue(
+            isinstance(release_plan_one["tradeoff"]["priority"], float))
+        self.assertTrue(
+            isinstance(release_plan_one["tradeoff"]["business_value"], float))
 
         self.assertTrue("releases" in release_plan_one)
         self.assertTrue(len(release_plan_one["releases"]) <= 2)
@@ -77,10 +83,11 @@ class ReleasePlannerRouteTests(unittest.TestCase):
         self.assertTrue("id" in release_plan_one["releases"][0]["features"][0])
 
     def test_non_JSON_release_plan_request_results_in_a_400_error(self):
-        result = self.app.post("release_plans/", data = "")
+        result = self.app.post("release_plans/", data="")
 
         self.assertEquals(result.status_code, 400)
-        self.assertEquals(result.headers.get("Content-Type"), "application/json")
+        self.assertEquals(
+            result.headers.get("Content-Type"), "application/json")
 
         response_body = json.loads(result.data)
         self.assertTrue("error" in response_body)
@@ -105,12 +112,13 @@ class ReleasePlannerRouteTests(unittest.TestCase):
         })
 
         result = self.app.post("release_plans/",
-            data = invalid_release_plan_request,
-            content_type = "application/json"
-        )
+                               data=invalid_release_plan_request,
+                               content_type="application/json"
+                               )
 
         self.assertEquals(result.status_code, 400)
-        self.assertEquals(result.headers.get("Content-Type"), "application/json")
+        self.assertEquals(
+            result.headers.get("Content-Type"), "application/json")
 
         response_body = json.loads(result.data)
         self.assertTrue("error" in response_body)

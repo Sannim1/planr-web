@@ -256,7 +256,7 @@ class Evolve:
         return penalty, benefit
 
     def cxSet(self, ind1, ind2):
-        """Crossovers release plans to generate 4 offsprings that share their characteristics
+        """Crossovers release plans to generate 2 offsprings that share their characteristics
 
             ind1, ind2 : parent release plans to be crossovered
         """
@@ -266,8 +266,6 @@ class Evolve:
         result_2 = ind2
         rnd1, rnd2 = random.sample(range(0, self.num_features - 1), 2)
         result_1[:rnd1] = ind2[:rnd1]
-        result_1[:rnd2] = ind2[:rnd2]
-        result_2[:rnd1] = ind1[:rnd1]
         result_2[:rnd2] = ind1[:rnd2]
         return result_1, result_2
 

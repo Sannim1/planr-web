@@ -57,9 +57,17 @@ class ReleasePlanRequestValidator:
         return True
 
     def add_error(self, error_message):
+        """
+            Adds an error message to the list of error messages encountered during validation
+
+            error_message: the newly encountered error message
+        """
         self._errors.append(error_message)
 
     def errors(self):
+        """
+            Returns a list of all error messages encountered during validation
+        """
         return self._errors
 
 
@@ -74,6 +82,8 @@ class FeatureValidator:
         """
             Validate a feature object by checking the existence of required fields and
             that fields have an appropriate data type.
+
+            feature: the feature object whose fields are to be validated
         """
         if not isinstance(feature, dict):
             self.add_error("A feature must be represented as a JSON object")
@@ -109,6 +119,12 @@ class FeatureValidator:
         return True
 
     def validate_precedence(self, feature, feature_ids):
+        """
+            Checks the validity of the precedence constraint set on a particular feature.
+
+            feature: the feature whose precedence constraint is to be checked
+            feature_ids: a list of IDs of all of the features in the current release plan request
+        """
         if "preceded_by" not in feature:
             return True
         if not isinstance(feature["preceded_by"], int):
@@ -123,6 +139,12 @@ class FeatureValidator:
         return True
 
     def validate_coupling(self, feature, feature_ids):
+        """
+            Checks the validity of the coupling constraint set on a particular feature.
+
+            feature: the feature whose coupling constraint is to be checked
+            feature_ids: a list of IDs of all of the features in the current release plan request
+        """
         if "coupled_with" not in feature:
             return True
         if not isinstance(feature["coupled_with"], int):
@@ -137,7 +159,15 @@ class FeatureValidator:
         return True
 
     def add_error(self, error_message):
+        """
+            Adds an error message to the list of error messages encountered during validation
+
+            error_message: the newly encountered error message
+        """
         self._errors.append(error_message)
 
     def errors(self):
+        """
+            Returns a list of all error messages encountered during validation
+        """
         return self._errors

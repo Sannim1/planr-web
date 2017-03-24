@@ -22,6 +22,7 @@ def create_release_plans():
     if not validator.validate(request.json):
         raise BadRequest(validator.errors()[0])
 
+    # instantiate a new planner object which can be invoked to generate release plans
     planner = Planner()
     release_plans, metadata = planner.request_plans(request.json[
                                                     "features"], request.json["team_capacity"], request.json["number_of_releases"])

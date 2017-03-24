@@ -1,3 +1,4 @@
+__author__ = "Nikolaos Kaloumenos, Bingquan Wang and Abdulmusawwir Sanni"
 import random
 import sys
 from deap import algorithms

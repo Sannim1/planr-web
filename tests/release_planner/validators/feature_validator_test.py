@@ -1,3 +1,4 @@
+__author__ = "Abdulmusawwir Sanni"
 from app.release_planner.validator import FeatureValidator
 import unittest
 

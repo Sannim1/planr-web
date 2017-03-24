@@ -1,3 +1,4 @@
+__author__ = "Abdulmusawwir Sanni"
 # Import flask and template operators
 from flask import Flask, make_response, jsonify, request
 from flask_cors import CORS, cross_origin

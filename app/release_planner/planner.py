@@ -1,5 +1,5 @@
+__author__ = "Nikolaos Kaloumenos and Abdulmusawwir Sanni"
 from algorithms.evolve import Evolve
-
 
 class Planner:
 
